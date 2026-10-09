@@ -3,292 +3,577 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV D-Pad Focus Test Suite</title>
+    <title>Android TV D-PAD Navigation Tester</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tvDark: '#0a0f1d',
+                        tvCard: '#161f36',
+                        tvFocusGlow: '#00f0ff',
+                        tvAccent: '#3b82f6'
+                    },
+                    boxShadow: {
+                        'tv-focus': '0 0 0 4px #00f0ff, 0 0 30px rgba(0, 240, 255, 0.6), 0 10px 25px rgba(0,0,0,0.5)',
+                        'tv-focus-gold': '0 0 0 4px #fbbf24, 0 0 30px rgba(251, 191, 36, 0.6), 0 10px 25px rgba(0,0,0,0.5)'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
+        /* Overscan Safe Zone: 5% padding around the viewport */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
+            background-color: #080c18;
+            color: #f1f5f9;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Avoid TV scrollbars */
             user-select: none;
             -webkit-user-select: none;
-            overflow: hidden;
         }
 
-        /* High-visibility TV focus states for D-Pad navigation */
+        /* TV Safe Zone wrapper */
+        .tv-safe-zone {
+            box-sizing: border-box;
+            width: 100vw;
+            height: 100vh;
+            padding: 5vh 5vw; /* 5% overscan margin per Android TV guidelines */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* High Contrast Focus States for 10-Foot UI */
         .tv-focusable {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            outline: none;
+            outline: none !important;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        box-shadow 0.2s ease, 
+                        background-color 0.2s ease, 
+                        border-color 0.2s ease;
+            position: relative;
         }
 
-        .tv-focusable:focus {
+        /* Dynamic focus state applied both by :focus pseudo-class and explicit JS class */
+        .tv-focusable:focus, .tv-focusable.is-focused {
             transform: scale(1.06);
-            border-color: #38bdf8;
-            box-shadow: 0 0 25px rgba(56, 189, 248, 0.6), 0 0 50px rgba(56, 189, 248, 0.2);
-            z-index: 20;
+            z-index: 30;
+            background-color: #1e293b;
+            border-color: #00f0ff !important;
+            box-shadow: 0 0 0 5px #00f0ff, 0 0 35px rgba(0, 240, 255, 0.65), 0 12px 28px rgba(0,0,0,0.6);
         }
 
-        /* Active pulse effect when remote ENTER/SELECT is pressed */
-        .tv-focusable:active {
-            transform: scale(0.98);
+        /* Active click ripple effect */
+        .tv-focusable:active, .tv-focusable.is-pressed {
+            transform: scale(0.98) !important;
+            box-shadow: 0 0 0 3px #38bdf8, 0 0 20px rgba(56, 189, 248, 0.8) !important;
+            background-color: #0284c7 !important;
         }
 
-        @keyframes pulse-ring {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 0.4; }
-            100% { transform: scale(0.95); opacity: 0.8; }
+        /* Custom scrollbar for key event log */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
         }
 
-        .active-pulse {
-            animation: pulse-ring 1.5s infinite ease-in-out;
+        /* Pulse animation for active key visualizer */
+        @keyframes dpadPulse {
+            0% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.15); filter: brightness(1.5); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+        .dpad-active {
+            animation: dpadPulse 0.2s ease-out;
+            fill: #00f0ff !important;
+            stroke: #ffffff !important;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-6 md:p-10 bg-slate-950 text-slate-100">
-
-    <header class="flex flex-col md:flex-row justify-between items-center border-b border-slate-800 pb-4 mb-4 gap-4">
-        <div>
-            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-sky-400 flex items-center gap-3">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                </svg>
-                TV D-Pad Focus Test
-            </h1>
-            <p class="text-slate-400 text-sm mt-1">Use your Mi Box remote arrows to jump between buttons & Press ENTER to trigger action</p>
-        </div>
-
-        <!-- Status Panel -->
-        <div class="flex items-center gap-6 bg-slate-900 border border-slate-800 px-5 py-3 rounded-xl shadow-inner">
-            <div class="text-center">
-                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Focused Item</div>
-                <div id="focused-title" class="text-lg font-bold text-sky-400">Button 1</div>
-            </div>
-            <div class="h-8 w-px bg-slate-800"></div>
-            <div class="text-center">
-                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Clicks</div>
-                <div id="total-clicks" class="text-lg font-bold text-emerald-400">0</div>
-            </div>
-        </div>
-    </header>
-
-    <div id="action-banner" class="w-full bg-slate-900/80 border border-slate-800 text-slate-300 text-center py-2.5 rounded-lg text-sm md:text-base font-mono mb-4 transition-all duration-300">
-        Ready for navigation test...
-    </div>
-
-    <main class="flex-1 grid grid-cols-2 gap-6 items-stretch my-auto">
+<body>
+    <div class="tv-safe-zone">
         
-        <!-- Button 1: Audio Tone Synthesizer -->
-        <button tabindex="1" id="btn-1" onclick="handleAction('Audio Beep', 1)" class="tv-focusable flex flex-col justify-between p-6 bg-slate-900 border-2 border-slate-700/80 rounded-2xl cursor-pointer text-left focus:bg-slate-800 group">
-            <div class="flex justify-between items-start">
-                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase bg-slate-800 group-focus:bg-sky-950 group-focus:text-sky-300 px-3 py-1 rounded-full">Col 1 • Row 1</span>
-                <span class="text-2xl">🔊</span>
+        <!-- Header Section -->
+        <header class="flex justify-between items-center pb-4 border-b border-slate-800/80">
+            <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl lg:text-3xl font-extrabold tracking-wide text-white">Android TV D-PAD Navigation Tester</h1>
+                    <p class="text-xs lg:text-sm text-cyan-400 font-medium">10-Foot UI Grid Test • 5% Overscan Safe Zone • Spatial Routing Enabled</p>
+                </div>
             </div>
-            <div class="my-auto">
-                <h2 class="text-2xl md:text-3xl font-bold text-slate-100 group-focus:text-sky-300">Audio Tone</h2>
-                <p class="text-sm text-slate-400 mt-1">Plays a Web Audio synth beep</p>
-            </div>
-            <div class="text-xs font-semibold text-slate-500 group-focus:text-sky-400 flex items-center gap-1">
-                Trigger count: <span id="count-1" class="font-mono text-slate-200">0</span>
-            </div>
-        </button>
 
-        <!-- Button 2: Color Glow Pulsar -->
-        <button tabindex="2" id="btn-2" onclick="handleAction('Color Flash', 2)" class="tv-focusable flex flex-col justify-between p-6 bg-slate-900 border-2 border-slate-700/80 rounded-2xl cursor-pointer text-left focus:bg-slate-800 group">
-            <div class="flex justify-between items-start">
-                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase bg-slate-800 group-focus:bg-sky-950 group-focus:text-sky-300 px-3 py-1 rounded-full">Col 2 • Row 1</span>
-                <span class="text-2xl">🎨</span>
+            <!-- Controls & Settings Badges -->
+            <div class="flex items-center space-x-3">
+                <button id="sound-toggle" tabindex="0" class="tv-focusable bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2.5 rounded-lg border border-slate-700 flex items-center space-x-2">
+                    <span id="sound-icon">🔊</span>
+                    <span id="sound-label">Audio: ON</span>
+                </button>
+                <div class="bg-slate-800/60 border border-slate-700/60 px-3 py-1.5 rounded-lg text-xs font-mono text-slate-300">
+                    Mode: <span class="text-emerald-400 font-bold">Standard Grid</span>
+                </div>
             </div>
-            <div class="my-auto">
-                <h2 class="text-2xl md:text-3xl font-bold text-slate-100 group-focus:text-sky-300">Color Flash</h2>
-                <p class="text-sm text-slate-400 mt-1">Flashes background accent color</p>
-            </div>
-            <div class="text-xs font-semibold text-slate-500 group-focus:text-sky-400 flex items-center gap-1">
-                Trigger count: <span id="count-2" class="font-mono text-slate-200">0</span>
-            </div>
-        </button>
+        </header>
 
-        <!-- Button 3: Interactive Counter -->
-        <button tabindex="3" id="btn-3" onclick="handleAction('Counter Increment', 3)" class="tv-focusable flex flex-col justify-between p-6 bg-slate-900 border-2 border-slate-700/80 rounded-2xl cursor-pointer text-left focus:bg-slate-800 group">
-            <div class="flex justify-between items-start">
-                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase bg-slate-800 group-focus:bg-sky-950 group-focus:text-sky-300 px-3 py-1 rounded-full">Col 1 • Row 2</span>
-                <span class="text-2xl">🔢</span>
-            </div>
-            <div class="my-auto">
-                <h2 class="text-2xl md:text-3xl font-bold text-slate-100 group-focus:text-sky-300">Rapid Counter</h2>
-                <p class="text-sm text-slate-400 mt-1">Increments live score counter</p>
-            </div>
-            <div class="text-xs font-semibold text-slate-500 group-focus:text-sky-400 flex items-center gap-1">
-                Trigger count: <span id="count-3" class="font-mono text-slate-200">0</span>
-            </div>
-        </button>
+        <!-- Main Content Grid (Left: 2-Column Button Test Grid | Right: Real-time Telemetry Dashboard) -->
+        <main class="grid grid-cols-12 gap-8 my-auto py-2">
+            
+            <!-- LEFT AREA: 2-Column Target Grid with 3 Large TV Buttons -->
+            <section class="col-span-7 flex flex-col justify-center space-y-6">
+                
+                <div class="text-slate-400 text-sm font-medium flex items-center space-x-2 mb-1">
+                    <svg class="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>Use Remote D-PAD (Up / Down / Left / Right) & Center Select</span>
+                </div>
 
-        <!-- Button 4: Modal Alert Test -->
-        <button tabindex="4" id="btn-4" onclick="handleAction('Toggle Overlay', 4)" class="tv-focusable flex flex-col justify-between p-6 bg-slate-900 border-2 border-slate-700/80 rounded-2xl cursor-pointer text-left focus:bg-slate-800 group">
-            <div class="flex justify-between items-start">
-                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase bg-slate-800 group-focus:bg-sky-950 group-focus:text-sky-300 px-3 py-1 rounded-full">Col 2 • Row 2</span>
-                <span class="text-2xl">💬</span>
-            </div>
-            <div class="my-auto">
-                <h2 class="text-2xl md:text-3xl font-bold text-slate-100 group-focus:text-sky-300">Pop-up Overlay</h2>
-                <p class="text-sm text-slate-400 mt-1">Shows full-screen confirm dialog</p>
-            </div>
-            <div class="text-xs font-semibold text-slate-500 group-focus:text-sky-400 flex items-center gap-1">
-                Trigger count: <span id="count-4" class="font-mono text-slate-200">0</span>
-            </div>
-        </button>
+                <!-- 2-Column Grid Container -->
+                <div class="grid grid-cols-2 gap-6" id="button-grid">
+                    
+                    <!-- BUTTON 1 (Column 1, Row 1) -->
+                    <button id="btn-1" 
+                            tabindex="0" 
+                            data-nav-name="Button 1 (Row 1, Col 1)"
+                            class="tv-focusable relative group bg-slate-800/90 hover:bg-slate-800 text-white rounded-2xl p-6 border-2 border-slate-700/70 flex flex-col justify-between items-start h-44 shadow-lg">
+                        <div class="flex justify-between items-center w-full">
+                            <span class="text-xs font-bold tracking-wider px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                                ROW 1 • COL 1
+                            </span>
+                            <span class="w-8 h-8 rounded-full bg-slate-700 group-hover:bg-cyan-500 text-slate-300 group-hover:text-black flex items-center justify-center font-bold text-sm transition-colors">
+                                1
+                            </span>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black tracking-tight text-white group-hover:text-cyan-300">BUTTON ONE</h2>
+                            <p class="text-xs text-slate-400 mt-1">Default Initial Focus Target</p>
+                        </div>
+                        <div class="w-full flex justify-between items-center pt-2 border-t border-slate-700/50 text-xs font-mono text-slate-400">
+                            <span>Clicks: <strong id="count-btn-1" class="text-cyan-400 font-bold text-sm">0</strong></span>
+                            <span class="text-slate-500">Press ENTER / DPAD_CENTER</span>
+                        </div>
+                    </button>
 
-        <!-- Button 5: Random Dice Roller -->
-        <button tabindex="5" id="btn-5" onclick="handleAction('Random Roll', 5)" class="tv-focusable flex flex-col justify-between p-6 bg-slate-900 border-2 border-slate-700/80 rounded-2xl cursor-pointer text-left focus:bg-slate-800 group">
-            <div class="flex justify-between items-start">
-                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase bg-slate-800 group-focus:bg-sky-950 group-focus:text-sky-300 px-3 py-1 rounded-full">Col 1 • Row 3</span>
-                <span class="text-2xl">🎲</span>
-            </div>
-            <div class="my-auto">
-                <h2 class="text-2xl md:text-3xl font-bold text-slate-100 group-focus:text-sky-300">Dice Roll</h2>
-                <p class="text-sm text-slate-400 mt-1">Generates random value (1-100)</p>
-            </div>
-            <div class="text-xs font-semibold text-slate-500 group-focus:text-sky-400 flex items-center gap-1">
-                Trigger count: <span id="count-5" class="font-mono text-slate-200">0</span>
-            </div>
-        </button>
+                    <!-- BUTTON 2 (Column 2, Row 1) -->
+                    <button id="btn-2" 
+                            tabindex="0" 
+                            data-nav-name="Button 2 (Row 1, Col 2)"
+                            class="tv-focusable relative group bg-slate-800/90 hover:bg-slate-800 text-white rounded-2xl p-6 border-2 border-slate-700/70 flex flex-col justify-between items-start h-44 shadow-lg">
+                        <div class="flex justify-between items-center w-full">
+                            <span class="text-xs font-bold tracking-wider px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                                ROW 1 • COL 2
+                            </span>
+                            <span class="w-8 h-8 rounded-full bg-slate-700 group-hover:bg-purple-500 text-slate-300 group-hover:text-black flex items-center justify-center font-bold text-sm transition-colors">
+                                2
+                            </span>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black tracking-tight text-white group-hover:text-purple-300">BUTTON TWO</h2>
+                            <p class="text-xs text-slate-400 mt-1">Horizontal Neighbor Target</p>
+                        </div>
+                        <div class="w-full flex justify-between items-center pt-2 border-t border-slate-700/50 text-xs font-mono text-slate-400">
+                            <span>Clicks: <strong id="count-btn-2" class="text-purple-400 font-bold text-sm">0</strong></span>
+                            <span class="text-slate-500">Press ENTER / DPAD_CENTER</span>
+                        </div>
+                    </button>
 
-        <!-- Button 6: Reset State -->
-        <button tabindex="6" id="btn-6" onclick="handleAction('Reset All', 6)" class="tv-focusable flex flex-col justify-between p-6 bg-slate-900 border-2 border-rose-900/50 rounded-2xl cursor-pointer text-left focus:bg-slate-800 group">
-            <div class="flex justify-between items-start">
-                <span class="text-xs font-bold tracking-widest text-rose-400 uppercase bg-rose-950/60 group-focus:bg-rose-900 group-focus:text-rose-200 px-3 py-1 rounded-full">Col 2 • Row 3</span>
-                <span class="text-2xl">🔄</span>
-            </div>
-            <div class="my-auto">
-                <h2 class="text-2xl md:text-3xl font-bold text-rose-300 group-focus:text-rose-200">Reset Suite</h2>
-                <p class="text-sm text-slate-400 mt-1">Clears all click logs and metrics</p>
-            </div>
-            <div class="text-xs font-semibold text-slate-500 group-focus:text-rose-400 flex items-center gap-1">
-                Trigger count: <span id="count-6" class="font-mono text-slate-200">0</span>
-            </div>
-        </button>
+                    <!-- BUTTON 3 (Spans 2 Columns, Row 2) -->
+                    <button id="btn-3" 
+                            tabindex="0" 
+                            data-nav-name="Button 3 (Row 2, Full Width)"
+                            class="tv-focusable col-span-2 relative group bg-slate-800/90 hover:bg-slate-800 text-white rounded-2xl p-6 border-2 border-slate-700/70 flex justify-between items-center h-36 shadow-lg">
+                        <div class="flex flex-col justify-center items-start">
+                            <span class="text-xs font-bold tracking-wider px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-2">
+                                ROW 2 • SPAN BOTH COLUMNS
+                            </span>
+                            <h2 class="text-2xl font-black tracking-tight text-white group-hover:text-emerald-300">BUTTON THREE</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Navigates vertically from both Button 1 & Button 2</p>
+                        </div>
+                        <div class="flex items-center space-x-6">
+                            <div class="text-right font-mono text-xs text-slate-400">
+                                <div>Clicks: <strong id="count-btn-3" class="text-emerald-400 font-bold text-base">0</strong></div>
+                                <div class="text-slate-500 mt-1">Wide Target Area</div>
+                            </div>
+                            <span class="w-12 h-12 rounded-2xl bg-slate-700 group-hover:bg-emerald-500 text-slate-300 group-hover:text-black flex items-center justify-center font-black text-xl transition-colors">
+                                3
+                            </span>
+                        </div>
+                    </button>
 
-    </main>
+                </div>
+            </section>
 
-    <div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex-col items-center justify-center p-6 z-50">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl p-8 max-w-lg w-full text-center shadow-2xl space-y-6">
-            <h3 class="text-2xl font-bold text-sky-400">Modal Focus Test</h3>
-            <p class="text-slate-300">If your browser handles spatial navigation well, pressing ENTER on the close button below will close this modal.</p>
-            <button id="modal-close-btn" tabindex="7" onclick="closeModal()" class="tv-focusable w-full py-4 bg-sky-500 text-slate-950 font-extrabold text-lg rounded-xl hover:bg-sky-400 focus:bg-sky-300">
-                Close Modal (Enter)
-            </button>
-        </div>
+            <!-- RIGHT AREA: Telemetry Dashboard & D-PAD Remote Visualizer -->
+            <section class="col-span-5 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between shadow-2xl">
+                
+                <!-- Focus Status Header -->
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-4">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Currently Focused Element</div>
+                    <div id="current-focus-label" class="text-xl font-extrabold text-cyan-300 truncate">
+                        Button 1 (Row 1, Col 1)
+                    </div>
+                    <div class="flex items-center justify-between text-xs font-mono text-slate-400 mt-2 pt-2 border-t border-slate-700/60">
+                        <span>Tag: <strong id="current-focus-tag" class="text-slate-200">BUTTON</strong></span>
+                        <span>ID: <strong id="current-focus-id" class="text-amber-400">btn-1</strong></span>
+                    </div>
+                </div>
+
+                <!-- D-PAD Remote SVG Visualizer -->
+                <div class="my-4 flex items-center justify-around bg-slate-950/60 border border-slate-800/80 rounded-xl p-4">
+                    
+                    <!-- SVG Visualizer -->
+                    <div class="relative w-32 h-32 flex items-center justify-center">
+                        <svg class="w-32 h-32" viewBox="0 0 100 100">
+                            <!-- Outer Remote Ring -->
+                            <circle cx="50" cy="50" r="46" fill="#1e293b" stroke="#334155" stroke-width="3"/>
+                            
+                            <!-- UP Arrow -->
+                            <path id="svg-dpad-up" class="transition-colors duration-150" d="M35 30 L50 12 L65 30 Z" fill="#475569" stroke="#1e293b" stroke-width="1.5"/>
+                            <!-- DOWN Arrow -->
+                            <path id="svg-dpad-down" class="transition-colors duration-150" d="M35 70 L50 88 L65 70 Z" fill="#475569" stroke="#1e293b" stroke-width="1.5"/>
+                            <!-- LEFT Arrow -->
+                            <path id="svg-dpad-left" class="transition-colors duration-150" d="M30 35 L12 50 L30 65 Z" fill="#475569" stroke="#1e293b" stroke-width="1.5"/>
+                            <!-- RIGHT Arrow -->
+                            <path id="svg-dpad-right" class="transition-colors duration-150" d="M70 35 L88 50 L70 65 Z" fill="#475569" stroke="#1e293b" stroke-width="1.5"/>
+                            <!-- CENTER Select -->
+                            <circle id="svg-dpad-center" class="transition-colors duration-150" cx="50" cy="50" r="14" fill="#38bdf8" stroke="#0284c7" stroke-width="2"/>
+                        </svg>
+                    </div>
+
+                    <!-- Key Event Data Summary -->
+                    <div class="flex flex-col space-y-2 font-mono text-xs">
+                        <div class="bg-slate-800/90 px-3 py-1.5 rounded-md border border-slate-700">
+                            <span class="text-slate-400">Last Action:</span>
+                            <div id="telemetry-action" class="text-sm font-bold text-amber-300">NAVIGATE_INITIAL</div>
+                        </div>
+                        <div class="bg-slate-800/90 px-3 py-1.5 rounded-md border border-slate-700">
+                            <span class="text-slate-400">Key Name:</span>
+                            <div id="telemetry-key" class="text-sm font-bold text-cyan-300">None</div>
+                        </div>
+                        <div class="bg-slate-800/90 px-3 py-1.5 rounded-md border border-slate-700">
+                            <span class="text-slate-400">KeyCode:</span>
+                            <div id="telemetry-code" class="text-sm font-bold text-emerald-300">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Key Code Console Log -->
+                <div class="flex-1 flex flex-col min-h-0 bg-slate-950/80 border border-slate-800 rounded-xl p-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Event Telemetry Log</span>
+                        <button id="clear-log-btn" tabindex="0" class="tv-focusable text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">
+                            Clear Log
+                        </button>
+                    </div>
+                    <div id="telemetry-log" class="flex-1 overflow-y-auto font-mono text-xs space-y-1 pr-1">
+                        <div class="text-slate-500 italic">[System] Application initialized. TV Focus set to Button 1.</div>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+
+        <!-- Footer / Supported TV Keys Guidance -->
+        <footer class="pt-3 border-t border-slate-800/80 flex justify-between items-center text-xs font-mono text-slate-400">
+            <div class="flex items-center space-x-4">
+                <span class="flex items-center space-x-1.5">
+                    <kbd class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200">↑ ↓ ← →</kbd>
+                    <span>/ KeyCodes 19, 20, 21, 22</span>
+                </span>
+                <span class="text-slate-600">•</span>
+                <span class="flex items-center space-x-1.5">
+                    <kbd class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200">ENTER / SPACE</kbd>
+                    <span>/ KeyCodes 23, 66</span>
+                </span>
+            </div>
+            <div class="text-slate-500">
+                Optimized for Android TV WebViews, Silk & Chrome
+            </div>
+        </footer>
+
     </div>
 
-    <footer class="mt-4 border-t border-slate-800 pt-3 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-2">
-        <div>TV Remote Test Status: <span id="key-debug" class="font-mono text-amber-400">Awaiting Key Press...</span></div>
-        <div class="flex gap-4">
-            <span>Arrow Keys = Jump</span>
-            <span>OK/Enter = Click</span>
-        </div>
-    </footer>
-
+    <!-- JavaScript Logic -->
     <script>
-        let totalClicks = 0;
-        const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
-        let audioCtx = null;
+        (function() {
+            // Click counters
+            const clickCounts = {
+                'btn-1': 0,
+                'btn-2': 0,
+                'btn-3': 0
+            };
 
-        // Web Audio API Synth for Button 1
-        function playSynthBeep() {
-            try {
+            // Audio Feedback Engine using Web Audio API (No external assets required)
+            let audioCtx = null;
+            let soundEnabled = true;
+
+            function initAudio() {
                 if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5 note
-                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.3);
-            } catch (e) {
-                console.log("Audio not supported or blocked", e);
-            }
-        }
-
-        // Action Router
-        function handleAction(actionName, btnId) {
-            totalClicks++;
-            counts[btnId]++;
-
-            // Update UI Counters
-            document.getElementById('total-clicks').innerText = totalClicks;
-            document.getElementById(`count-${btnId}`).innerText = counts[btnId];
-
-            const banner = document.getElementById('action-banner');
-
-            switch (btnId) {
-                case 1:
-                    playSynthBeep();
-                    banner.innerText = `[Action 1] Played Synth Audio Beep Tone!`;
-                    banner.className = "w-full bg-sky-950 border border-sky-500 text-sky-200 text-center py-2.5 rounded-lg text-sm md:text-base font-mono mb-4 transition-all duration-300";
-                    break;
-                case 2:
-                    document.body.classList.add('bg-indigo-950');
-                    setTimeout(() => document.body.classList.remove('bg-indigo-950'), 400);
-                    banner.innerText = `[Action 2] Color Flash Triggered!`;
-                    banner.className = "w-full bg-purple-950 border border-purple-500 text-purple-200 text-center py-2.5 rounded-lg text-sm md:text-base font-mono mb-4 transition-all duration-300";
-                    break;
-                case 3:
-                    banner.innerText = `[Action 3] Counter incremented! Button 3 clicked ${counts[3]} times.`;
-                    banner.className = "w-full bg-emerald-950 border border-emerald-500 text-emerald-200 text-center py-2.5 rounded-lg text-sm md:text-base font-mono mb-4 transition-all duration-300";
-                    break;
-                case 4:
-                    document.getElementById('modal-overlay').classList.remove('hidden');
-                    document.getElementById('modal-overlay').classList.add('flex');
-                    document.getElementById('modal-close-btn').focus();
-                    banner.innerText = `[Action 4] Opened Overlay Dialog.`;
-                    break;
-                case 5:
-                    const roll = Math.floor(Math.random() * 100) + 1;
-                    banner.innerText = `[Action 5] Dice Roll Result: ${roll}!`;
-                    banner.className = "w-full bg-amber-950 border border-amber-500 text-amber-200 text-center py-2.5 rounded-lg text-sm md:text-base font-mono mb-4 transition-all duration-300";
-                    break;
-                case 6:
-                    totalClicks = 0;
-                    for (let i = 1; i <= 6; i++) {
-                        counts[i] = 0;
-                        document.getElementById(`count-${i}`).innerText = 0;
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        audioCtx = new AudioContext();
                     }
-                    document.getElementById('total-clicks').innerText = 0;
-                    banner.innerText = `[Action 6] All stats reset to 0!`;
-                    banner.className = "w-full bg-rose-950 border border-rose-500 text-rose-200 text-center py-2.5 rounded-lg text-sm md:text-base font-mono mb-4 transition-all duration-300";
-                    break;
+                }
             }
-        }
 
-        function closeModal() {
-            document.getElementById('modal-overlay').classList.add('hidden');
-            document.getElementById('modal-overlay').classList.remove('flex');
-            document.getElementById('btn-4').focus();
-        }
+            function playSound(type) {
+                if (!soundEnabled) return;
+                try {
+                    initAudio();
+                    if (!audioCtx) return;
+                    if (audioCtx.state === 'suspended') {
+                        audioCtx.resume();
+                    }
 
-        // Track focus changes for the status bar
-        document.querySelectorAll('.tv-focusable').forEach(element => {
-            element.addEventListener('focus', (e) => {
-                const titleText = e.target.querySelector('h2') ? e.target.querySelector('h2').innerText : 'Modal Button';
-                document.getElementById('focused-title').innerText = titleText;
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    const now = audioCtx.currentTime;
+
+                    if (type === 'move') {
+                        // Crisp TV D-Pad move beep
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(440, now);
+                        osc.frequency.exponentialRampToValueAtTime(880, now + 0.05);
+                        gain.gain.setValueAtTime(0.15, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                        osc.start(now);
+                        osc.stop(now + 0.05);
+                    } else if (type === 'click') {
+                        // Satisfying selection chord/chime
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(523.25, now); // C5
+                        osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.12); // C6
+                        gain.gain.setValueAtTime(0.25, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                        osc.start(now);
+                        osc.stop(now + 0.12);
+                    }
+                } catch (e) {
+                    console.log('Audio playback error:', e);
+                }
+            }
+
+            // Audio Toggle Listener
+            const soundBtn = document.getElementById('sound-toggle');
+            const soundIcon = document.getElementById('sound-icon');
+            const soundLabel = document.getElementById('sound-label');
+
+            soundBtn.addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                soundIcon.textContent = soundEnabled ? '🔊' : '🔇';
+                soundLabel.textContent = `Audio: ${soundEnabled ? 'ON' : 'OFF'}`;
+                appendLog(`Audio feedback ${soundEnabled ? 'enabled' : 'muted'}.`);
             });
-        });
 
-        // Debug keypress events for remote buttons
-        window.addEventListener('keydown', (e) => {
-            const keyDebug = document.getElementById('key-debug');
-            keyDebug.innerText = `Last Key: ${e.key} (Code: ${e.keyCode})`;
-        });
+            // Keycodes standard across Android TV, Fire TV, Tizen, WebOS and Web Browsers
+            const TV_KEYS = {
+                19: 'UP',        'ArrowUp': 'UP',
+                20: 'DOWN',      'ArrowDown': 'DOWN',
+                21: 'LEFT',      'ArrowLeft': 'LEFT',
+                22: 'RIGHT',     'ArrowRight': 'RIGHT',
+                23: 'CENTER',    'Enter': 'CENTER', 66: 'CENTER', 32: 'CENTER',
+                4: 'BACK',       'Escape': 'BACK', 27: 'BACK', 8: 'BACK'
+            };
 
-        // Initial focus on startup for seamless TV experience
-        window.onload = () => {
-            document.getElementById('btn-1').focus();
-        };
+            // Explicit Spatial Navigation Map for 100% Deterministic D-PAD Navigation
+            // Grid layout:
+            // [ Button 1 ] [ Button 2 ]
+            // [      Button 3        ]
+            // Settings buttons in header/footer are also linked
+            const SPATIAL_MAP = {
+                'btn-1': {
+                    RIGHT: 'btn-2',
+                    DOWN: 'btn-3',
+                    UP: 'sound-toggle',
+                    LEFT: null
+                },
+                'btn-2': {
+                    LEFT: 'btn-1',
+                    DOWN: 'btn-3',
+                    UP: 'sound-toggle',
+                    RIGHT: null
+                },
+                'btn-3': {
+                    UP: 'btn-1', // Default UP goes to Button 1
+                    DOWN: 'clear-log-btn',
+                    LEFT: null,
+                    RIGHT: null
+                },
+                'sound-toggle': {
+                    DOWN: 'btn-1',
+                    RIGHT: 'clear-log-btn'
+                },
+                'clear-log-btn': {
+                    UP: 'btn-3',
+                    LEFT: 'sound-toggle'
+                }
+            };
+
+            // Telemetry logging helper
+            const logContainer = document.getElementById('telemetry-log');
+            function appendLog(msg, type = 'info') {
+                const row = document.createElement('div');
+                const time = new Date().toLocaleTimeString().split(' ')[0];
+                
+                let colorClass = 'text-slate-300';
+                if (type === 'key') colorClass = 'text-cyan-300';
+                if (type === 'click') colorClass = 'text-emerald-300 font-bold';
+                if (type === 'nav') colorClass = 'text-amber-300';
+
+                row.className = `${colorClass} flex space-x-2`;
+                row.innerHTML = `<span class="text-slate-600 font-mono">[${time}]</span><span>${msg}</span>`;
+                
+                logContainer.appendChild(row);
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+
+            // Clear Log Button
+            document.getElementById('clear-log-btn').addEventListener('click', () => {
+                logContainer.innerHTML = '<div class="text-slate-500 italic">[Log Cleared]</div>';
+            });
+
+            // Highlight SVG D-Pad Remote diagram
+            function flashDpadVisual(direction) {
+                const elementIdMap = {
+                    'UP': 'svg-dpad-up',
+                    'DOWN': 'svg-dpad-down',
+                    'LEFT': 'svg-dpad-left',
+                    'RIGHT': 'svg-dpad-right',
+                    'CENTER': 'svg-dpad-center'
+                };
+
+                const targetId = elementIdMap[direction];
+                if (!targetId) return;
+
+                const svgElem = document.getElementById(targetId);
+                if (svgElem) {
+                    svgElem.classList.add('dpad-active');
+                    setTimeout(() => {
+                        svgElem.classList.remove('dpad-active');
+                    }, 200);
+                }
+            }
+
+            // Update telemetry panel when focus changes
+            function updateFocusTelemetry(element) {
+                if (!element) return;
+
+                const name = element.getAttribute('data-nav-name') || element.innerText.trim() || element.id;
+                document.getElementById('current-focus-label').textContent = name;
+                document.getElementById('current-focus-tag').textContent = element.tagName;
+                document.getElementById('current-focus-id').textContent = element.id || 'No ID';
+
+                // Ensure styling highlights active focus element reliably across all WebViews
+                document.querySelectorAll('.tv-focusable').forEach(el => el.classList.remove('is-focused'));
+                element.classList.add('is-focused');
+
+                playSound('move');
+            }
+
+            // Bind click handlers to test buttons
+            ['btn-1', 'btn-2', 'btn-3'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.addEventListener('click', (e) => {
+                        // Increment counter
+                        clickCounts[id]++;
+                        document.getElementById(`count-${id}`).textContent = clickCounts[id];
+
+                        // Visual press animation
+                        btn.classList.add('is-pressed');
+                        setTimeout(() => btn.classList.remove('is-pressed'), 180);
+
+                        // Sound & Log
+                        playSound('click');
+                        appendLog(`CLICKED ${id.toUpperCase()} (Total: ${clickCounts[id]})`, 'click');
+                    });
+                }
+            });
+
+            // Universal Focus Event Listeners
+            document.addEventListener('focusin', (e) => {
+                if (e.target && e.target.classList && e.target.classList.contains('tv-focusable')) {
+                    updateFocusTelemetry(e.target);
+                }
+            });
+
+            // Global Keydown Handler for TV D-PAD
+            document.addEventListener('keydown', (e) => {
+                const keyCode = e.keyCode || e.which;
+                const keyName = e.key;
+                const action = TV_KEYS[keyCode] || TV_KEYS[keyName];
+
+                // Update Telemetry Panel
+                document.getElementById('telemetry-key').textContent = keyName || 'Unknown';
+                document.getElementById('telemetry-code').textContent = keyCode || '-';
+                document.getElementById('telemetry-action').textContent = action || 'UNMAPPED';
+
+                if (action) {
+                    flashDpadVisual(action);
+                    appendLog(`Key: ${keyName} | Code: ${keyCode} → Action: ${action}`, 'key');
+                } else {
+                    appendLog(`Unhandled Key: ${keyName} (${keyCode})`, 'info');
+                }
+
+                const currentElem = document.activeElement;
+                const currentId = currentElem ? currentElem.id : null;
+
+                // DPAD Directional Movement Logic
+                if (['UP', 'DOWN', 'LEFT', 'RIGHT'].includes(action)) {
+                    e.preventDefault(); // Stop default web view scrolling
+
+                    if (currentId && SPATIAL_MAP[currentId] && SPATIAL_MAP[currentId][action]) {
+                        const targetId = SPATIAL_MAP[currentId][action];
+                        const targetElem = document.getElementById(targetId);
+                        if (targetElem) {
+                            targetElem.focus();
+                            appendLog(`Navigated ${action} → ${targetId}`, 'nav');
+                        }
+                    } else {
+                        // Fallback: If no explicit mapping, perform native spatial search or stay put
+                        appendLog(`Reached ${action} edge boundary`, 'info');
+                    }
+                } 
+                // DPAD Center / Enter / Space Click Trigger
+                else if (action === 'CENTER') {
+                    if (currentElem && typeof currentElem.click === 'function') {
+                        e.preventDefault();
+                        currentElem.click();
+                    }
+                }
+            });
+
+            // BEST PRACTICE: Automatically set focus to the first element upon loading
+            window.addEventListener('DOMContentLoaded', () => {
+                const firstButton = document.getElementById('btn-1');
+                if (firstButton) {
+                    // Small timeout ensures WebView DOM layout engine is ready
+                    setTimeout(() => {
+                        firstButton.focus();
+                        updateFocusTelemetry(firstButton);
+                        appendLog('Initial focus successfully targeted to Button 1', 'nav');
+                    }, 100);
+                }
+            });
+
+        })();
     </script>
 </body>
 </html>
