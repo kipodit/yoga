@@ -1,251 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Android TV DPAD Navigation Demo</title>
-    
-    <style>
-        /* Viewport reset to prevent scrolling on TV screens */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none; /* Disable text selection on TV interactions */
-            -webkit-user-select: none;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Yoga with Adriene</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      text-align: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 900px;
+    }
+    .header h1 {
+      font-size: 2.2rem;
+      color: #38bdf8;
+      letter-spacing: 2px;
+      margin-bottom: 0.5rem;
+    }
+    .header p {
+      font-size: 1.4rem;
+      color: #94a3b8;
+      margin-bottom: 2.5rem;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #ffffff; /* Plain white background as requested */
-            color: #111111;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden; /* Prevent scrolling for standard TV layouts */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 3vw;
-        }
+    /* Large TV-friendly button card */
+    .yoga-card {
+      display: block;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 3px solid #334155;
+      border-radius: 28px;
+      padding: 3rem 2rem;
+      color: #ffffff;
+      text-decoration: none;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      transition: all 0.2s ease-in-out;
+      outline: none;
+      cursor: pointer;
+    }
 
-        /* Title / instruction header */
-        .header {
-            text-align: center;
-            margin-bottom: 2vh;
-        }
+    /* Focus state for TV Bro remote D-pad navigation */
+    .yoga-card:focus, .yoga-card:hover {
+      transform: scale(1.04);
+      border-color: #38bdf8;
+      box-shadow: 0 0 40px rgba(56, 189, 248, 0.6);
+      background: linear-gradient(135deg, #1e3a8a, #1e293b);
+    }
 
-        .header h1 {
-            font-size: 2vw;
-            font-weight: 600;
-            margin-bottom: 0.5vh;
-            color: #222222;
-        }
-
-        .header p {
-            font-size: 1.2vw;
-            color: #666666;
-        }
-
-        /* 2-Column x 3-Row Grid Container */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 2.5vw;
-            width: 80vw;
-            height: 70vh;
-            max-width: 1200px;
-        }
-
-        /* Standard Focusable Button Base Style */
-        .nav-button {
-            background-color: #f0f0f0; /* Default neutral background */
-            border: 3px solid #cccccc;   /* Visible border in unfocused state */
-            border-radius: 12px;
-            font-size: 2.2vw;
-            font-weight: bold;
-            color: #333333;
-            cursor: pointer;
-            outline: none; /* Hide standard browser outline to use custom high-contrast focus style */
-            transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        /* 
-           ANDROID TV FOCUS BEST PRACTICE:
-           High contrast color change + subtle scale transform for immediate 10-foot legibility
-        */
-        .nav-button:focus,
-        .nav-button.focused {
-            background-color: #000000;  /* Bold black background on focus */
-            color: #ffffff;             /* White text on focus */
-            border-color: #000000;
-            transform: scale(1.04);     /* Scale indicator to signify selection */
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25); /* Visual elevation depth */
-        }
-
-        /* Active feedback trigger when DPAD Center / Enter is pressed */
-        .nav-button:active {
-            transform: scale(0.98);
-        }
-
-        /* Status message box to display DPAD interactions */
-        .status-toast {
-            position: fixed;
-            bottom: 3vh;
-            background: #f4f4f4;
-            border: 1px solid #ddd;
-            padding: 0.8em 1.5em;
-            border-radius: 20px;
-            font-size: 1.1vw;
-            color: #444;
-            font-weight: 500;
-        }
-    </style>
+    .day-badge {
+      display: inline-block;
+      background-color: #0284c7;
+      color: #ffffff;
+      padding: 0.5rem 1.4rem;
+      border-radius: 50px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .video-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 1.2rem;
+      color: #ffffff;
+    }
+    .video-meta {
+      font-size: 1.8rem;
+      color: #38bdf8;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+    .btn-action {
+      display: inline-block;
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: #e11d48;
+      color: white;
+      padding: 1rem 2.5rem;
+      border-radius: 18px;
+      box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4);
+    }
+    .status {
+      font-size: 1.8rem;
+      color: #94a3b8;
+    }
+    .error {
+      color: #f87171;
+    }
+  </style>
 </head>
 <body>
 
+  <div class="container">
     <div class="header">
-        <h1>Android TV DPAD Navigation</h1>
-        <p>Use Up / Down / Left / Right on your DPAD or keyboard arrow keys</p>
+      <h1>YOGA WITH ADRIENE</h1>
+      <p id="today-date">Loading practice...</p>
     </div>
 
-    <!-- 
-       DPAD spatial navigation works natively using <button> elements with tabindex="0".
-       Each button is arranged in a 2-column, 3-row layout structure.
-    -->
-    <main class="grid-container" id="gridContainer">
-        <button class="nav-button" tabindex="0" data-index="0">Option 1</button>
-        <button class="nav-button" tabindex="0" data-index="1">Option 2</button>
-        <button class="nav-button" tabindex="0" data-index="2">Option 3</button>
-        <button class="nav-button" tabindex="0" data-index="3">Option 4</button>
-        <button class="nav-button" tabindex="0" data-index="4">Option 5</button>
-        <button class="nav-button" tabindex="0" data-index="5">Option 6</button>
-    </main>
+    <!-- Main clickable TV remote button -->
+    <a id="play-button" class="yoga-card" href="#" target="_blank">
+      <div id="card-content">
+        <div class="status">Finding today's calendar practice...</div>
+      </div>
+    </a>
+  </div>
 
-    <!-- Status toast displaying active user selection -->
-    <div class="status-toast" id="statusToast">Selected: Option 1</div>
+  <script>
+    const CONFIG = {
+      // Paste your free YouTube Data API Key here
+      API_KEY: 'AIzaSyC7cTA9VoTfR4NiSOv9Uh9bJX70kqNbu9U',
+      
+      // Yoga With Adriene's official YouTube Channel ID
+      CHANNEL_ID: 'UCFJOsVSa8HoQEUlg3RrYpWQ'
+    };
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const buttons = Array.from(document.querySelectorAll('.nav-button'));
-            const statusToast = document.getElementById('statusToast');
-            const COLUMNS = 2;
-            const TOTAL_ITEMS = buttons.length;
-            let currentIndex = 0;
+    // Helper: Parse ISO 8601 duration string (e.g., PT21M45S -> "22 mins")
+    function parseDuration(isoDuration) {
+      if (!isoDuration) return '';
+      const match = isoDuration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+      if (!match) return '';
+      const hours = parseInt(match[1] || 0);
+      const minutes = parseInt(match[2] || 0);
+      const seconds = parseInt(match[3] || 0);
 
-            // ANDROID TV BEST PRACTICE: Auto-focus the primary/first item upon page launch
-            function initFocus() {
-                if (buttons.length > 0) {
-                    buttons[0].focus();
-                    updateStatus(0);
-                }
-            }
+      let totalMins = hours * 60 + minutes;
+      if (seconds >= 30) totalMins += 1;
+      return `${totalMins} mins`;
+    }
 
-            // Helper to focus button at a specific index cleanly
-            function setFocusToIndex(index) {
-                if (index >= 0 && index < TOTAL_ITEMS) {
-                    currentIndex = index;
-                    buttons[currentIndex].focus();
-                    updateStatus(currentIndex);
-                }
-            }
+    // Auto-discover the current month's playlist ID from Adriene's channel
+    async function fetchCurrentMonthPlaylistId(apiKey, monthName) {
+      const url = `https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${CONFIG.CHANNEL_ID}&maxResults=25&key=${apiKey}`;
+      const response = await fetch(url);
+      const data = await response.json();
 
-            // Update user status display when focused or clicked
-            function updateStatus(index) {
-                statusToast.textContent = `Focused: Option ${index + 1}`;
-            }
+      if (!data.items || data.items.length === 0) {
+        throw new Error('Unable to find playlists on Yoga With Adriene channel.');
+      }
 
-            buttons.forEach((button, index) => {
-                // Focus event listener to sync index if mouse hover/click occurs
-                button.addEventListener('focus', () => {
-                    currentIndex = index;
-                    updateStatus(index);
-                });
+      // Search channel playlists for current month name (e.g. "October")
+      const monthLower = monthName.toLowerCase();
+      const monthPlaylist = data.items.find(item => 
+        item.snippet.title.toLowerCase().includes(monthLower)
+      );
 
-                // Enter / DPAD Center press action
-                button.addEventListener('click', () => {
-                    statusToast.textContent = `Activated: Option ${index + 1}!`;
-                    
-                    // Quick flash feedback effect
-                    button.style.backgroundColor = '#2563eb';
-                    setTimeout(() => {
-                        button.style.backgroundColor = '';
-                    }, 200);
-                });
-            });
+      // Return matching monthly playlist ID, or default to her most recent playlist
+      return monthPlaylist ? monthPlaylist.id : data.items[0].id;
+    }
 
-            /*
-               Deterministic Spatial Navigation Math for 2-column grid:
-               - Left:  currentIndex - 1 (if not in column 0)
-               - Right: currentIndex + 1 (if not in column 1)
-               - Up:    currentIndex - 2
-               - Down:  currentIndex + 2
-            */
-            window.addEventListener('keydown', (event) => {
-                // KeyCodes supported: Standard TV Remote DPAD & Keyboard Arrow Keys
-                const keyCode = event.keyCode || event.which;
+    async function loadTodayVideo() {
+      const today = new Date();
+      const dayOfMonth = today.getDate();
+      const monthName = today.toLocaleString('default', { month: 'long' });
 
-                switch (event.key) {
-                    case 'ArrowLeft':
-                    case 'Left':
-                    case '37':
-                        if (currentIndex % COLUMNS !== 0) {
-                            setFocusToIndex(currentIndex - 1);
-                            event.preventDefault();
-                        }
-                        break;
+      // Update header date
+      const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+      document.getElementById('today-date').innerText = today.toLocaleDateString(undefined, dateOptions);
 
-                    case 'ArrowRight':
-                    case 'Right':
-                    case '39':
-                        if (currentIndex % COLUMNS < COLUMNS - 1 && currentIndex + 1 < TOTAL_ITEMS) {
-                            setFocusToIndex(currentIndex + 1);
-                            event.preventDefault();
-                        }
-                        break;
+      const playBtn = document.getElementById('play-button');
+      const cardContent = document.getElementById('card-content');
 
-                    case 'ArrowUp':
-                    case 'Up':
-                    case '38':
-                        if (currentIndex - COLUMNS >= 0) {
-                            setFocusToIndex(currentIndex - COLUMNS);
-                            event.preventDefault();
-                        }
-                        break;
+      try {
+        if (!CONFIG.API_KEY || CONFIG.API_KEY === 'YOUR_YOUTUBE_API_KEY') {
+          throw new Error('Please enter your YouTube API Key in index.html');
+        }
 
-                    case 'ArrowDown':
-                    case 'Down':
-                    case '40':
-                        if (currentIndex + COLUMNS < TOTAL_ITEMS) {
-                            setFocusToIndex(currentIndex + COLUMNS);
-                            event.preventDefault();
-                        }
-                        break;
+        // 1. Automatically find this month's playlist
+        const playlistId = await fetchCurrentMonthPlaylistId(CONFIG.API_KEY, monthName);
 
-                    case 'Enter':
-                    case 'Select':
-                    case '13':
-                    case '66': // Android KEYCODE_NUMPAD_ENTER / DPAD_CENTER
-                        // Native click is automatically dispatched for focused HTML <button>,
-                        // but prevent scrolling on keypresses
-                        if (document.activeElement === buttons[currentIndex]) {
-                            // Click event handles action
-                        }
-                        break;
+        // 2. Fetch Playlist Items
+        const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=31&key=${CONFIG.API_KEY}`;
+        const playlistRes = await fetch(playlistUrl);
+        const playlistData = await playlistRes.json();
 
-                    default:
-                        break;
-                }
-            });
+        if (!playlistData.items || playlistData.items.length === 0) {
+          throw new Error('Playlist is empty or invalid.');
+        }
 
-            // Initialize focus once DOM is ready
-            initFocus();
-        });
-    </script>
+        // Match video for today (Day 1 = Index 0, Day 2 = Index 1, etc.)
+        const todayIndex = Math.min(dayOfMonth - 1, playlistData.items.length - 1);
+        const videoItem = playlistData.items[todayIndex];
+        const videoId = videoItem.contentDetails.videoId;
+        const videoTitle = videoItem.snippet.title;
+
+        // 3. Fetch exact duration
+        const videoUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoId}&key=${CONFIG.API_KEY}`;
+        const videoRes = await fetch(videoUrl);
+        const videoData = await videoRes.json();
+
+        let durationText = 'Yoga Practice';
+        if (videoData.items && videoData.items.length > 0) {
+          durationText = parseDuration(videoData.items[0].contentDetails.duration);
+        }
+
+        // 4. Update TV UI & direct YouTube link
+        playBtn.href = `https://www.youtube.com/watch?v=${videoId}`;
+        cardContent.innerHTML = `
+          <div class="day-badge">Day ${dayOfMonth}</div>
+          <div class="video-title">${videoTitle}</div>
+          <div class="video-meta">⏱️ ${durationText}</div>
+          <div class="btn-action">▶ Start Practice</div>
+        `;
+
+        // Auto-focus button for instant TV remote selection
+        playBtn.focus();
+
+      } catch (err) {
+        console.error(err);
+        cardContent.innerHTML = `
+          <div class="status error">
+            ⚠️ Could not load today's practice<br>
+            <span style="font-size: 1.2rem; opacity: 0.8;">${err.message}</span>
+          </div>
+        `;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadTodayVideo);
+  </script>
 </body>
 </html>
