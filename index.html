@@ -83,7 +83,7 @@
                     <span id="date-month-name" class="text-xs md:text-sm font-bold tracking-wider uppercase opacity-80">---</span>
                 </div>
                 <div>
-                    <h1 id="video-title" class="text-2xl md:text-4xl font-bold tracking-tight highlight-text">Loading today's video...</h1>
+                    <h1 id="video-title" class="text-2xl md:text-4xl font-bold tracking-tight highlight-text"></h1>
                 </div>
             </div>
 
@@ -261,4 +261,47 @@
                 document.getElementById('video-duration').textContent = formattedDuration;
 
                 // Configure click handler on top button
-                const topBtn = document.getElementById('top
+                const topBtn = document.getElementById('top-button');
+                topBtn.onclick = () => openYouTubeVideo(videoId);
+
+            } catch (err) {
+                console.error('Error fetching YouTube data:', err);
+                document.getElementById('video-title').textContent = "--";
+                document.getElementById('video-duration').textContent = "-- min";
+            }
+        }
+
+        // Initialize setup and focus state
+        window.addEventListener('DOMContentLoaded', () => {
+            updateDateHeader();
+            fetchDailyYogaVideo();
+
+            const topButton = document.getElementById('top-button');
+            if (topButton) {
+                topButton.focus();
+            }
+        });
+
+        // D-pad Enter press visuals & feedback
+        document.addEventListener('keydown', (e) => {
+            const active = document.activeElement;
+            if (e.key === 'Enter' || e.key === ' ') {
+                if (active && active.classList.contains('tv-focusable')) {
+                    active.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        active.style.transform = '';
+                    }, 150);
+                }
+            }
+        });
+
+        // Pointer/air-mouse support
+        const focusableElements = document.querySelectorAll('.tv-focusable');
+        focusableElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                el.focus();
+            });
+        });
+    </script>
+</body>
+</html>
