@@ -1,9 +1,294 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Yoga with Kipod</title>
-    </head>
-    <body>
-        <p>🦔</p>
-    </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TV D-Pad Focus Test Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
+        }
+
+        /* High-visibility TV focus states for D-Pad navigation */
+        .tv-focusable {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+        }
+
+        .tv-focusable:focus {
+            transform: scale(1.06);
+            border-color: #38bdf8;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.6), 0 0 50px rgba(56, 189, 248, 0.2);
+            z-index: 20;
+        }
+
+        /* Active pulse effect when remote ENTER/SELECT is pressed */
+        .tv-focusable:active {
+            transform: scale(0.98);
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 0.4; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        .active-pulse {
+            animation: pulse-ring 1.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-6 md:p-10 bg-slate-950 text-slate-100">
+
+    <header class="flex flex-col md:flex-row justify-between items-center border-b border-slate-800 pb-4 mb-4 gap-4">
+        <div>
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-sky-400 flex items-center gap-3">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                TV D-Pad Focus Test
+            </h1>
+            <p class="text-slate-400 text-sm mt-1">Use your Mi Box remote arrows to jump between buttons & Press ENTER to trigger action</p>
+        </div>
+
+        <!-- Status Panel -->
+        <div class="flex items-center gap-6 bg-slate-900 border border-slate-800 px-5 py-3 rounded-xl shadow-inner">
+            <div class="text-center">
+                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Focused Item</div>
+                <div id="focused-title" class="text-lg font-bold text-sky-400">Button 1</div>
+            </div>
+            <div class="h-8 w-px bg-slate-800"></div>
+            <div class="text-center">
+                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Clicks</div>
+                <div id="total-clicks" class="text-lg font-bold text-emerald-400">0</div>
+            </div>
+        </div>
+    </header>
+
+    <div id="action-banner" class="w-full bg-slate-900/80 border border-slate-800 text-slate-300 text-center py-2.5 rounded-lg text-sm md:text-base font-mono mb-4 transition-all duration-300">
+        Ready for navigation test...
+    </div>
+
+    <main class="flex-1 grid grid-cols-2 gap-6 items-stretch my-auto">
+        
+        <!-- Button 1: Audio Tone Synthesizer -->
+        <button tabindex="1" id="btn-1" onclick="handleAction('Audio Beep', 1)" class="tv-focusable flex flex-col justify-between p-6 bg-slate-900 border-2 border-slate-700/80 rounded-2xl cursor-pointer text-left focus:bg-slate-800 group">
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase bg-slate-800 group-focus:bg-sky-950 group-focus:text-sky-300 px-3 py-1 rounded-full">Col 1 • Row 1</span>
+                <span class="text-2xl">🔊</span>
+            </div>
+            <div class="my-auto">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-100 group-focus:text-sky-300">Audio Tone</h2>
+                <p class="text-sm text-slate-400 mt-1">Plays a Web Audio synth beep</p>
+            </div>
+            <div class="text-xs font-semibold text-slate-500 group-focus:text-sky-400 flex items-center gap-1">
+                Trigger count: <span id="count-1" class="font-mono text-slate-200">0</span>
+            </div>
+        </button>
+
+        <!-- Button 2: Color Glow Pulsar -->
+        <button tabindex="2" id="btn-2" onclick="handleAction('Color Flash', 2)" class="tv-focusable flex flex-col justify-between p-6 bg-slate-900 border-2 border-slate-700/80 rounded-2xl cursor-pointer text-left focus:bg-slate-800 group">
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase bg-slate-800 group-focus:bg-sky-950 group-focus:text-sky-300 px-3 py-1 rounded-full">Col 2 • Row 1</span>
+                <span class="text-2xl">🎨</span>
+            </div>
+            <div class="my-auto">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-100 group-focus:text-sky-300">Color Flash</h2>
+                <p class="text-sm text-slate-400 mt-1">Flashes background accent color</p>
+            </div>
+            <div class="text-xs font-semibold text-slate-500 group-focus:text-sky-400 flex items-center gap-1">
+                Trigger count: <span id="count-2" class="font-mono text-slate-200">0</span>
+            </div>
+        </button>
+
+        <!-- Button 3: Interactive Counter -->
+        <button tabindex="3" id="btn-3" onclick="handleAction('Counter Increment', 3)" class="tv-focusable flex flex-col justify-between p-6 bg-slate-900 border-2 border-slate-700/80 rounded-2xl cursor-pointer text-left focus:bg-slate-800 group">
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase bg-slate-800 group-focus:bg-sky-950 group-focus:text-sky-300 px-3 py-1 rounded-full">Col 1 • Row 2</span>
+                <span class="text-2xl">🔢</span>
+            </div>
+            <div class="my-auto">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-100 group-focus:text-sky-300">Rapid Counter</h2>
+                <p class="text-sm text-slate-400 mt-1">Increments live score counter</p>
+            </div>
+            <div class="text-xs font-semibold text-slate-500 group-focus:text-sky-400 flex items-center gap-1">
+                Trigger count: <span id="count-3" class="font-mono text-slate-200">0</span>
+            </div>
+        </button>
+
+        <!-- Button 4: Modal Alert Test -->
+        <button tabindex="4" id="btn-4" onclick="handleAction('Toggle Overlay', 4)" class="tv-focusable flex flex-col justify-between p-6 bg-slate-900 border-2 border-slate-700/80 rounded-2xl cursor-pointer text-left focus:bg-slate-800 group">
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase bg-slate-800 group-focus:bg-sky-950 group-focus:text-sky-300 px-3 py-1 rounded-full">Col 2 • Row 2</span>
+                <span class="text-2xl">💬</span>
+            </div>
+            <div class="my-auto">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-100 group-focus:text-sky-300">Pop-up Overlay</h2>
+                <p class="text-sm text-slate-400 mt-1">Shows full-screen confirm dialog</p>
+            </div>
+            <div class="text-xs font-semibold text-slate-500 group-focus:text-sky-400 flex items-center gap-1">
+                Trigger count: <span id="count-4" class="font-mono text-slate-200">0</span>
+            </div>
+        </button>
+
+        <!-- Button 5: Random Dice Roller -->
+        <button tabindex="5" id="btn-5" onclick="handleAction('Random Roll', 5)" class="tv-focusable flex flex-col justify-between p-6 bg-slate-900 border-2 border-slate-700/80 rounded-2xl cursor-pointer text-left focus:bg-slate-800 group">
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase bg-slate-800 group-focus:bg-sky-950 group-focus:text-sky-300 px-3 py-1 rounded-full">Col 1 • Row 3</span>
+                <span class="text-2xl">🎲</span>
+            </div>
+            <div class="my-auto">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-100 group-focus:text-sky-300">Dice Roll</h2>
+                <p class="text-sm text-slate-400 mt-1">Generates random value (1-100)</p>
+            </div>
+            <div class="text-xs font-semibold text-slate-500 group-focus:text-sky-400 flex items-center gap-1">
+                Trigger count: <span id="count-5" class="font-mono text-slate-200">0</span>
+            </div>
+        </button>
+
+        <!-- Button 6: Reset State -->
+        <button tabindex="6" id="btn-6" onclick="handleAction('Reset All', 6)" class="tv-focusable flex flex-col justify-between p-6 bg-slate-900 border-2 border-rose-900/50 rounded-2xl cursor-pointer text-left focus:bg-slate-800 group">
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-bold tracking-widest text-rose-400 uppercase bg-rose-950/60 group-focus:bg-rose-900 group-focus:text-rose-200 px-3 py-1 rounded-full">Col 2 • Row 3</span>
+                <span class="text-2xl">🔄</span>
+            </div>
+            <div class="my-auto">
+                <h2 class="text-2xl md:text-3xl font-bold text-rose-300 group-focus:text-rose-200">Reset Suite</h2>
+                <p class="text-sm text-slate-400 mt-1">Clears all click logs and metrics</p>
+            </div>
+            <div class="text-xs font-semibold text-slate-500 group-focus:text-rose-400 flex items-center gap-1">
+                Trigger count: <span id="count-6" class="font-mono text-slate-200">0</span>
+            </div>
+        </button>
+
+    </main>
+
+    <div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex-col items-center justify-center p-6 z-50">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl p-8 max-w-lg w-full text-center shadow-2xl space-y-6">
+            <h3 class="text-2xl font-bold text-sky-400">Modal Focus Test</h3>
+            <p class="text-slate-300">If your browser handles spatial navigation well, pressing ENTER on the close button below will close this modal.</p>
+            <button id="modal-close-btn" tabindex="7" onclick="closeModal()" class="tv-focusable w-full py-4 bg-sky-500 text-slate-950 font-extrabold text-lg rounded-xl hover:bg-sky-400 focus:bg-sky-300">
+                Close Modal (Enter)
+            </button>
+        </div>
+    </div>
+
+    <footer class="mt-4 border-t border-slate-800 pt-3 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-2">
+        <div>TV Remote Test Status: <span id="key-debug" class="font-mono text-amber-400">Awaiting Key Press...</span></div>
+        <div class="flex gap-4">
+            <span>Arrow Keys = Jump</span>
+            <span>OK/Enter = Click</span>
+        </div>
+    </footer>
+
+    <script>
+        let totalClicks = 0;
+        const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+        let audioCtx = null;
+
+        // Web Audio API Synth for Button 1
+        function playSynthBeep() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5 note
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } catch (e) {
+                console.log("Audio not supported or blocked", e);
+            }
+        }
+
+        // Action Router
+        function handleAction(actionName, btnId) {
+            totalClicks++;
+            counts[btnId]++;
+
+            // Update UI Counters
+            document.getElementById('total-clicks').innerText = totalClicks;
+            document.getElementById(`count-${btnId}`).innerText = counts[btnId];
+
+            const banner = document.getElementById('action-banner');
+
+            switch (btnId) {
+                case 1:
+                    playSynthBeep();
+                    banner.innerText = `[Action 1] Played Synth Audio Beep Tone!`;
+                    banner.className = "w-full bg-sky-950 border border-sky-500 text-sky-200 text-center py-2.5 rounded-lg text-sm md:text-base font-mono mb-4 transition-all duration-300";
+                    break;
+                case 2:
+                    document.body.classList.add('bg-indigo-950');
+                    setTimeout(() => document.body.classList.remove('bg-indigo-950'), 400);
+                    banner.innerText = `[Action 2] Color Flash Triggered!`;
+                    banner.className = "w-full bg-purple-950 border border-purple-500 text-purple-200 text-center py-2.5 rounded-lg text-sm md:text-base font-mono mb-4 transition-all duration-300";
+                    break;
+                case 3:
+                    banner.innerText = `[Action 3] Counter incremented! Button 3 clicked ${counts[3]} times.`;
+                    banner.className = "w-full bg-emerald-950 border border-emerald-500 text-emerald-200 text-center py-2.5 rounded-lg text-sm md:text-base font-mono mb-4 transition-all duration-300";
+                    break;
+                case 4:
+                    document.getElementById('modal-overlay').classList.remove('hidden');
+                    document.getElementById('modal-overlay').classList.add('flex');
+                    document.getElementById('modal-close-btn').focus();
+                    banner.innerText = `[Action 4] Opened Overlay Dialog.`;
+                    break;
+                case 5:
+                    const roll = Math.floor(Math.random() * 100) + 1;
+                    banner.innerText = `[Action 5] Dice Roll Result: ${roll}!`;
+                    banner.className = "w-full bg-amber-950 border border-amber-500 text-amber-200 text-center py-2.5 rounded-lg text-sm md:text-base font-mono mb-4 transition-all duration-300";
+                    break;
+                case 6:
+                    totalClicks = 0;
+                    for (let i = 1; i <= 6; i++) {
+                        counts[i] = 0;
+                        document.getElementById(`count-${i}`).innerText = 0;
+                    }
+                    document.getElementById('total-clicks').innerText = 0;
+                    banner.innerText = `[Action 6] All stats reset to 0!`;
+                    banner.className = "w-full bg-rose-950 border border-rose-500 text-rose-200 text-center py-2.5 rounded-lg text-sm md:text-base font-mono mb-4 transition-all duration-300";
+                    break;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.add('hidden');
+            document.getElementById('modal-overlay').classList.remove('flex');
+            document.getElementById('btn-4').focus();
+        }
+
+        // Track focus changes for the status bar
+        document.querySelectorAll('.tv-focusable').forEach(element => {
+            element.addEventListener('focus', (e) => {
+                const titleText = e.target.querySelector('h2') ? e.target.querySelector('h2').innerText : 'Modal Button';
+                document.getElementById('focused-title').innerText = titleText;
+            });
+        });
+
+        // Debug keypress events for remote buttons
+        window.addEventListener('keydown', (e) => {
+            const keyDebug = document.getElementById('key-debug');
+            keyDebug.innerText = `Last Key: ${e.key} (Code: ${e.keyCode})`;
+        });
+
+        // Initial focus on startup for seamless TV experience
+        window.onload = () => {
+            document.getElementById('btn-1').focus();
+        };
+    </script>
+</body>
 </html>
