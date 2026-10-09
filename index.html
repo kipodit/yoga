@@ -211,6 +211,8 @@
 
         // 4. Update TV UI & direct YouTube link
         playBtn.href = `intent://www.youtube.com/watch?v=${videoId}#Intent;package=com.google.android.youtube.tv;scheme=https;end;`;
+        // 4. Update TV UI & direct third-party app link
+        // playBtn.href = vnd.youtube:${videoId};
         cardContent.innerHTML = `
           <div class="day-badge">Day ${dayOfMonth}</div>
           <div class="video-title">${videoTitle}</div>
