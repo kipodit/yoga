@@ -6,6 +6,8 @@
     <title>Yoga with Kipod</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
         * {
@@ -15,15 +17,15 @@
             -webkit-user-select: none;
         }
 
-        /* Pastel Purple Palette Theme */
+        /* Dark Pastel Purple Background Theme */
         body {
             background: linear-gradient(135deg, #1f1a2e 0%, #2a223f 50%, #362c52 100%);
             color: #ece8f5;
             min-height: 100vh;
-            overflow: hidden; /* Recommended for TV interfaces to avoid awkward scrolls */
+            overflow: hidden; /* Prevent scrolling on Android TV */
         }
 
-        /* TV Focus Target Styles */
+        /* Default Unfocused Button Target Styles */
         .tv-focusable {
             position: relative;
             background-color: rgba(255, 255, 255, 0.08);
@@ -31,48 +33,49 @@
             transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
             cursor: pointer;
             backdrop-filter: blur(8px);
+            color: #ece8f5;
         }
 
-        /* Pastel Teal Focus Highlights - optimized for 10ft TV viewing */
+        /* Rich Darker Teal Focus Highlights with Crisp White Text - optimized for Android TV D-pad & remote */
         .tv-focusable:focus,
         .tv-focusable.is-focused,
         .tv-focusable:hover {
-            background-color: #5eead4 !important; /* Pastel Teal */
-            border-color: #99f6e4 !important;
-            transform: scale(1.02);
+            background-color: #0d9488 !important; /* Rich Dark Teal */
+            border-color: #5eead4 !important;      /* Soft Pastel Teal Glowing Border */
+            color: #ffffff !important;             /* Pure White Text */
+            transform: scale(1.010);
             z-index: 20;
         }
 
-        /* Force ALL child text, spans, headings, and icons inside focused elements to dark slate */
-        .tv-focusable:focus,
+        /* Ensure ALL nested text, spans, headers, and SVG icons remain crisp white on focus */
         .tv-focusable:focus *,
-        .tv-focusable.is-focused,
         .tv-focusable.is-focused *,
-        .tv-focusable:hover,
         .tv-focusable:hover * {
-            color: #0f172a !important;
-            fill: #0f172a !important;
+            color: #ffffff !important;
+            fill: #ffffff !important;
+            stroke: #ffffff !important;
         }
 
-        /* Focus subtle glow badge inside elements */
+        /* Highlight text inside focused buttons */
+        .tv-focusable:focus .highlight-text,
+        .tv-focusable.is-focused .highlight-text,
+        .tv-focusable:hover .highlight-text {
+            color: #ffffff !important;
+        }
+
+        /* Accent badges inside focused elements */
         .tv-focusable:focus .badge-accent,
+        .tv-focusable.is-focused .badge-accent,
         .tv-focusable:hover .badge-accent {
-            background-color: rgba(15, 23, 42, 0.15) !important;
-        }
-
-        /* Pulsing indicator for active TV remote feel */
-        .focus-ring-pulse {
-            display: none;
-        }
-        .tv-focusable:focus .focus-ring-pulse {
-            display: block;
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            color: #ffffff !important;
         }
     </style>
 </head>
-<body class="flex flex-col justify-center gap-3 md:gap-4 p-4 md:p-6 lg:p-8 h-screen w-screen max-w-[1920px] mx-auto select-none">
+<body class="flex flex-col justify-center gap-2 md:gap-3 p-4 md:p-6 lg:p-8 h-screen w-screen max-w-[1920px] mx-auto select-none">
 
     <!-- TOP ROW BUTTON -->
-    <header class="w-full mb-3 md:mb-5">
+    <header class="w-full mb-1">
         <button 
             id="top-button"
             tabindex="0"
@@ -81,7 +84,7 @@
         >
             <!-- Left Side: Date Block & Video Title -->
             <div class="flex items-center space-x-4">
-                <div class="flex flex-col items-center justify-center bg-purple-900/40 badge-accent px-3 py-1.5 rounded-xl min-w-[65px]">
+                <div class="flex flex-col items-center justify-center bg-purple-900/40 badge-accent px-3 py-1.5 rounded-xl min-w-[65px] transition-colors">
                     <span id="date-day-name" class="text-[10px] font-bold tracking-widest uppercase opacity-80">---</span>
                     <span id="date-day-num" class="text-xl font-extrabold leading-none my-0.5">--</span>
                     <span id="date-month-name" class="text-[9px] font-bold tracking-wider uppercase opacity-80">---</span>
@@ -91,23 +94,29 @@
                 </div>
             </div>
 
-            <!-- Right Side: Duration & Icon -->
+            <!-- Right Side: Duration -->
             <div class="flex items-center space-x-3">
-                <span id="video-duration" class="badge-accent bg-purple-900/40 text-purple-200 px-3 py-1 rounded-lg text-xs md:text-sm font-bold">
+                <span id="video-duration" class="badge-accent bg-purple-900/40 text-purple-200 px-3 py-1 rounded-lg text-xs md:text-sm font-bold transition-colors">
                     -- min
                 </span>
             </div>
         </button>
     </header>
 
+    <!-- SUBTLE GLOWING HORIZONTAL DIVIDER -->
+    <div class="w-full my-1 md:my-2 flex items-center justify-center">
+        <div class="w-full h-[0px]"></div>
+    </div>
+	<div class="w-full my-1 md:my-2 flex items-center justify-center">
+        <div class="w-full h-[1px] bg-gradient-to-r from-transparent via-purple-300/30 to-transparent"></div>
+    </div>
+
     <!-- MIDDLE ROW: TWO COLUMNS -->
-    <main class="grid grid-cols-2 gap-4 w-full">
+    <main class="grid grid-cols-2 gap-4 w-full my-1">
         <!-- LEFT COLUMN: DURATION -->
         <section class="flex flex-col space-y-1.5">
             <h2 class="text-xs md:text-sm font-extrabold tracking-wider text-purple-200/80 uppercase px-2 flex items-center gap-2">
-                <svg class="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
+                <i class="fa-solid fa-clock text-purple-300 text-sm"></i>
                 Duration
             </h2>
             <div class="flex flex-col space-y-1.5">
@@ -126,9 +135,7 @@
         <!-- RIGHT COLUMN: FOCUS -->
         <section class="flex flex-col space-y-1.5">
             <h2 class="text-xs md:text-sm font-extrabold tracking-wider text-purple-200/80 uppercase px-2 flex items-center gap-2">
-                <svg class="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
+                <i class="fa-solid fa-spa text-purple-300 text-sm"></i>
                 Focus
             </h2>
             <div class="flex flex-col space-y-1.5">
@@ -146,14 +153,14 @@
     </main>
 
     <!-- BOTTOM ROW BUTTON -->
-    <footer class="w-full">
+    <footer class="w-full mt-1">
         <button 
             tabindex="0" 
             class="tv-focusable w-full rounded-2xl p-3.5 md:p-4 flex items-center justify-between shadow-2xl text-left"
         >
             <!-- Left Side: PLAY Label & Title -->
             <div class="flex items-center space-x-4">
-                <div class="bg-purple-500/30 badge-accent p-2.5 rounded-xl flex items-center justify-center">
+                <div class="bg-purple-500/30 badge-accent p-2.5 rounded-xl flex items-center justify-center transition-colors">
                     <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
                         <path d="M8 5v14l11-7z"/>
                     </svg>
@@ -165,7 +172,7 @@
 
             <!-- Right Side: Duration -->
             <div class="flex items-center space-x-3">
-                <span class="badge-accent bg-purple-900/40 text-purple-200 px-3 py-1 rounded-lg text-xs md:text-sm font-bold">
+                <span class="badge-accent bg-purple-900/40 text-purple-200 px-3 py-1 rounded-lg text-xs md:text-sm font-bold transition-colors">
                     23 min
                 </span>
             </div>
