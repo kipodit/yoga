@@ -1,4 +1,605 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TV Flow - Quick Yoga Launcher</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts: Inter & Outit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            teal: {
+              soft: '#e6f4f1',
+              brand: '#4a9396',
+              dark: '#2c5e60',
+              glow: 'rgba(74, 147, 150, 0.35)',
+            },
+            purple: {
+              soft: '#e8e0f0',
+              brand: '#8b68a8',
+              dark: '#583b73',
+              glow: 'rgba(139, 104, 168, 0.35)',
+            },
+            tvBg: '#0f171d',
+            tvCard: '#1a242d',
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom TV Focus & Smooth Animations */
+    body {
+      background: linear-gradient(135deg, #0e161c 0%, #171d27 50%, #1e1b2e 100%);
+      color: #f0f4f8;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Soft Gradient Overlays */
+    .bg-glow-teal {
+      background: radial-gradient(circle at 10% 20%, rgba(74, 147, 150, 0.18) 0%, transparent 40%);
+    }
+    .bg-glow-purple {
+      background: radial-gradient(circle at 90% 80%, rgba(139, 104, 168, 0.18) 0%, transparent 40%);
+    }
+
+    /* D-PAD FOCUS ENGINE STYLES */
+    .tv-focusable {
+      outline: none !important;
+      transition: all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+
+    /* TV Focused State Highlights */
+    .tv-focusable:focus,
+    .tv-focusable.active-focus {
+      transform: scale(1.035);
+      z-index: 30;
+    }
+
+    .btn-teal:focus,
+    .btn-teal.active-focus {
+      border-color: #6fb2b5 !important;
+      box-shadow: 0 0 0 5px rgba(111, 178, 181, 0.4), 0 20px 30px -10px rgba(74, 147, 150, 0.5) !important;
+      background: linear-gradient(135deg, #4a9396 0%, #3a797c 100%) !important;
+    }
+
+    .btn-purple:focus,
+    .btn-purple.active-focus {
+      border-color: #aa88c7 !important;
+      box-shadow: 0 0 0 5px rgba(170, 136, 199, 0.4), 0 20px 30px -10px rgba(139, 104, 168, 0.5) !important;
+      background: linear-gradient(135deg, #8b68a8 0%, #6e4e89 100%) !important;
+    }
+
+    .btn-secondary:focus,
+    .btn-secondary.active-focus {
+      border-color: #94a3b8 !important;
+      box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.3), 0 10px 20px -5px rgba(0, 0, 0, 0.5) !important;
+      background-color: #334155 !important;
+    }
+
+    /* Custom Glassmorphism */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Pulse Indicator */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-glow {
+      animation: pulse-ring 3s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="flex flex-col justify-between p-6 md:p-10 select-none bg-glow-teal bg-glow-purple min-h-screen">
+
+  <!-- Header Bar -->
+  <header class="flex justify-between items-center mb-6">
+    <div class="flex items-center space-x-3">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-brand to-purple-brand flex items-center justify-center shadow-lg shadow-teal-brand/20">
+        <i class="fa-solid font-bold text-2xl text-white fa-spa"></i>
+      </div>
+      <div>
+        <h1 class="font-display font-bold text-2xl md:text-3xl tracking-tight text-white">FlowTV</h1>
+        <p class="text-xs md:text-sm text-slate-400">Daily Yoga Launcher</p>
+      </div>
+    </div>
+
+    <!-- Quick Status / Mode Toggle -->
+    <div class="flex items-center space-x-4">
+      <div id="dpad-indicator" class="hidden sm:flex items-center space-x-2 text-xs bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700/60 text-slate-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>D-Pad Active</span>
+      </div>
+      
+      <button id="btn-settings" tabindex="0" onclick="openSettings()" class="tv-focusable btn-secondary flex items-center space-x-2 bg-slate-800/80 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700/80 transition text-sm font-medium">
+        <i class="fa-solid fa-gear"></i>
+        <span>Manage Library</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Grid (2 Columns) -->
+  <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 my-auto items-stretch">
+    
+    <!-- LEFT COLUMN: 3 Main Large Practice Buttons (Span 7) -->
+    <section class="lg:col-span-7 flex flex-col justify-between space-y-4 md:space-y-5">
+      <div class="flex items-center justify-between mb-1">
+        <h2 class="text-lg md:text-xl font-semibold text-slate-200 flex items-center gap-2">
+          <i class="fa-solid fa-play text-teal-brand text-sm"></i>
+          Select Quick Practice
+        </h2>
+        <span class="text-xs text-slate-400">Use Remote Arrows & Enter</span>
+      </div>
+
+      <!-- Button 1: 15 Min Stretch (Teal Theme) -->
+      <button id="btn-stretch" tabindex="0" onclick="launchPractice('stretch')" 
+              class="tv-focusable btn-teal group relative w-full p-5 md:p-6 rounded-2xl text-left border-2 border-teal-brand/40 bg-gradient-to-r from-teal-brand/30 to-teal-dark/40 hover:from-teal-brand/40 hover:to-teal-dark/50 shadow-xl transition-all flex items-center justify-between overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-teal-brand/10 rounded-full blur-xl group-hover:bg-teal-brand/20 transition-all"></div>
+        <div class="flex items-center space-x-5 z-10">
+          <div class="w-14 h-14 md:w-16 md:h-16 rounded-xl bg-teal-soft/20 border border-teal-soft/30 flex items-center justify-center text-teal-soft text-2xl md:text-3xl group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-person-dots-from-line"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-soft/20 text-teal-soft border border-teal-soft/30">15 MINS</span>
+              <span id="count-stretch" class="text-xs text-teal-200/80">0 videos</span>
+            </div>
+            <h3 class="font-display text-2xl md:text-3xl font-bold text-white mt-1">Light Stretch</h3>
+            <p class="text-xs md:text-sm text-teal-100/70 line-clamp-1">Gentle mobility, tension relief & back unwinding</p>
+          </div>
+        </div>
+        <div class="z-10 w-12 h-12 rounded-full bg-teal-soft/10 group-hover:bg-teal-soft/30 flex items-center justify-center text-teal-soft text-lg transition-colors">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+      </button>
+
+      <!-- Button 2: 30 Min Power (Purple Theme) -->
+      <button id="btn-power" tabindex="0" onclick="launchPractice('power')" 
+              class="tv-focusable btn-purple group relative w-full p-5 md:p-6 rounded-2xl text-left border-2 border-purple-brand/40 bg-gradient-to-r from-purple-brand/30 to-purple-dark/40 hover:from-purple-brand/40 hover:to-purple-dark/50 shadow-xl transition-all flex items-center justify-between overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-purple-brand/10 rounded-full blur-xl group-hover:bg-purple-brand/20 transition-all"></div>
+        <div class="flex items-center space-x-5 z-10">
+          <div class="w-14 h-14 md:w-16 md:h-16 rounded-xl bg-purple-soft/20 border border-purple-soft/30 flex items-center justify-center text-purple-soft text-2xl md:text-3xl group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-fire-flame-curved"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-soft/20 text-purple-soft border border-purple-soft/30">30 MINS</span>
+              <span id="count-power" class="text-xs text-purple-200/80">0 videos</span>
+            </div>
+            <h3 class="font-display text-2xl md:text-3xl font-bold text-white mt-1">Power Flow</h3>
+            <p class="text-xs md:text-sm text-purple-100/70 line-clamp-1">Strength, stamina, core work & energizing vinyasa</p>
+          </div>
+        </div>
+        <div class="z-10 w-12 h-12 rounded-full bg-purple-soft/10 group-hover:bg-purple-soft/30 flex items-center justify-center text-purple-soft text-lg transition-colors">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+      </button>
+
+      <!-- Button 3: 20 Min Relax (Teal/Purple Hybrid) -->
+      <button id="btn-relax" tabindex="0" onclick="launchPractice('relax')" 
+              class="tv-focusable btn-teal group relative w-full p-5 md:p-6 rounded-2xl text-left border-2 border-teal-brand/40 bg-gradient-to-r from-teal-dark/40 via-purple-dark/30 to-teal-brand/30 hover:from-teal-dark/50 hover:to-teal-brand/40 shadow-xl transition-all flex items-center justify-between overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-teal-brand/10 rounded-full blur-xl group-hover:bg-teal-brand/20 transition-all"></div>
+        <div class="flex items-center space-x-5 z-10">
+          <div class="w-14 h-14 md:w-16 md:h-16 rounded-xl bg-teal-soft/20 border border-teal-soft/30 flex items-center justify-center text-teal-soft text-2xl md:text-3xl group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-moon"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-soft/20 text-teal-soft border border-teal-soft/30">20 MINS</span>
+              <span id="count-relax" class="text-xs text-teal-200/80">0 videos</span>
+            </div>
+            <h3 class="font-display text-2xl md:text-3xl font-bold text-white mt-1">Deep Calm</h3>
+            <p class="text-xs md:text-sm text-teal-100/70 line-clamp-1">Yin yoga, slow breathing, stress release & bedtime ease</p>
+          </div>
+        </div>
+        <div class="z-10 w-12 h-12 rounded-full bg-teal-soft/10 group-hover:bg-teal-soft/30 flex items-center justify-center text-teal-soft text-lg transition-colors">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+      </button>
+    </section>
+
+    <!-- RIGHT COLUMN: Preview, Stats & Quick Actions (Span 5) -->
+    <section class="lg:col-span-5 flex flex-col justify-between space-y-4">
+      
+      <!-- Video Preview Card / Selected Highlight -->
+      <div class="glass-card rounded-2xl p-6 flex-1 flex flex-col justify-between border border-slate-700/50 relative overflow-hidden">
+        
+        <!-- Background Ambient Glow -->
+        <div class="absolute -top-10 -right-10 w-40 h-40 bg-purple-brand/20 rounded-full blur-2xl"></div>
+
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs uppercase tracking-wider text-teal-brand font-bold flex items-center gap-2">
+              <i class="fa-solid fa-sparkles"></i>
+              Smart Selection Engine
+            </span>
+            <span id="total-library-count" class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full border border-slate-700">Total: 0 Videos</span>
+          </div>
+
+          <h3 class="font-display text-xl md:text-2xl font-bold text-white mb-2">Zero-Friction Yoga</h3>
+          <p class="text-slate-300 text-sm leading-relaxed mb-4">
+            Click any practice button to randomly launch a handpicked session. No endless scrolling or decision fatigue.
+          </p>
+
+          <!-- Direct Mode Switcher -->
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 mb-4">
+            <label class="text-xs text-slate-400 block mb-2 font-medium">Player Behavior:</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="btn-mode-youtube" tabindex="0" onclick="setPlayMode('direct')" class="tv-focusable text-xs py-2 px-3 rounded-lg border border-teal-brand/50 bg-teal-brand/20 text-teal-soft font-semibold text-center transition">
+                <i class="fa-brands fa-youtube mr-1"></i> YouTube App
+              </button>
+              <button id="btn-mode-embed" tabindex="0" onclick="setPlayMode('embed')" class="tv-focusable text-xs py-2 px-3 rounded-lg border border-slate-700 bg-slate-800 text-slate-400 font-semibold text-center transition">
+                <i class="fa-solid fa-tv mr-1"></i> Embedded Player
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Launch Any Random Video -->
+        <button id="btn-surprise" tabindex="0" onclick="launchRandomSurprise()" 
+                class="tv-focusable btn-purple w-full py-4 px-5 rounded-xl bg-purple-brand/30 hover:bg-purple-brand/40 border border-purple-brand/50 text-white font-semibold flex items-center justify-center space-x-3 transition">
+          <i class="fa-solid fa-shuffle text-purple-soft"></i>
+          <span>Surprise Me (Any Duration)</span>
+        </button>
+
+      </div>
+
+      <!-- Quick Tips Box -->
+      <div class="bg-slate-900/50 rounded-2xl p-4 border border-slate-800/80 flex items-center space-x-4">
+        <div class="w-10 h-10 rounded-lg bg-teal-brand/20 text-teal-brand flex items-center justify-center text-lg shrink-0">
+          <i class="fa-solid fa-gamepad"></i>
+        </div>
+        <p class="text-xs text-slate-400">
+          <strong class="text-slate-200">Remote Navigation:</strong> Use D-Pad arrows to move selection. Press <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">OK</kbd> or <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">Enter</kbd> to play.
+        </p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Library Management Modal (Settings) -->
+  <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+        <h3 class="font-display font-bold text-xl text-white flex items-center gap-2">
+          <i class="fa-solid fa-list-check text-purple-brand"></i>
+          Manage Video Library
+        </h3>
+        <button tabindex="0" onclick="closeSettings()" class="tv-focusable btn-secondary text-slate-400 hover:text-white px-3 py-1.5 rounded-lg border border-slate-800">
+          <i class="fa-solid fa-xmark"></i> Close
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto space-y-6 text-slate-300 text-sm">
+        
+        <!-- Add New Video Form -->
+        <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/60 space-y-3">
+          <h4 class="font-semibold text-white text-base">Add New YouTube Video</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <select id="new-category" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2.5 focus:outline-none focus:border-teal-brand">
+              <option value="stretch">15 Min Stretch</option>
+              <option value="power">30 Min Power</option>
+              <option value="relax">20 Min Relax</option>
+            </select>
+            <input type="text" id="new-videoid" placeholder="YouTube URL or Video ID (e.g., v7AYKMP6rOE)" class="sm:col-span-2 bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2.5 focus:outline-none focus:border-teal-brand">
+          </div>
+          <button tabindex="0" onclick="addCustomVideo()" class="tv-focusable btn-teal w-full py-2.5 bg-teal-brand hover:bg-teal-dark text-white rounded-lg font-medium transition">
+            Add to My Library
+          </button>
+        </div>
+
+        <!-- Video List by Category -->
+        <div id="video-list-container" class="space-y-4">
+          <!-- Dynamically Generated List -->
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-slate-800 bg-slate-950 flex justify-between items-center">
+        <button tabindex="0" onclick="resetLibraryToDefault()" class="tv-focusable text-xs text-rose-400 hover:text-rose-300 px-3 py-2 rounded border border-rose-900/40 bg-rose-950/30">
+          Reset to Default Library
+        </button>
+        <button tabindex="0" onclick="closeSettings()" class="tv-focusable btn-teal px-5 py-2 rounded-lg bg-teal-brand text-white font-medium">
+          Done
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Embedded TV Player Overlay -->
+  <div id="player-overlay" class="fixed inset-0 bg-black z-50 hidden flex-col justify-between">
+    <div class="absolute top-4 left-4 right-4 flex justify-between items-center z-10 opacity-0 hover:opacity-100 transition-opacity bg-black/60 p-3 rounded-xl backdrop-blur">
+      <span class="text-white font-medium text-sm flex items-center gap-2">
+        <i class="fa-solid fa-spa text-teal-brand"></i> Playing Practice
+      </span>
+      <button tabindex="0" onclick="closePlayer()" class="tv-focusable btn-secondary bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+        <i class="fa-solid fa-xmark mr-1"></i> Exit Video
+      </button>
+    </div>
+    
+    <div class="w-full h-full">
+      <iframe id="tv-youtube-iframe" class="w-full h-full" src="" title="Yoga Practice" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <script>
+    /* Default Handpicked Yoga Video Database */
+    const DEFAULT_LIBRARY = {
+      stretch: [
+        { id: "v7AYKMP6rOE", title: "15 Min Morning Yoga Stretch" },
+        { id: "4C-073rP2M4", title: "15 Min Full Body Stretch" },
+        { id: "g_tea8ZNk5A", title: "15 Min Gentle Flexibility" }
+      ],
+      power: [
+        { id: "b1H3xO3x_Js", title: "30 Min Power Vinyasa Flow" },
+        { id: "inpok4MKVLM", title: "30 Min Intermediate Power Yoga" },
+        { id: "sTANio_2E0Q", title: "30 Min Full Body Strength Yoga" }
+      ],
+      relax: [
+        { id: "COp7BR_Dvps", title: "20 Min Bedtime Relaxing Yin Yoga" },
+        { id: "sTANio_2E0Q", title: "20 Min Deep Restorative Release" },
+        { id: "UEE84RJ4W_4", title: "20 Min Evening Unwind Flow" }
+      ]
+    };
+
+    // Global State
+    let yogaLibrary = JSON.parse(localStorage.getItem('yoga_tv_library')) || DEFAULT_LIBRARY;
+    let playMode = localStorage.getItem('yoga_tv_mode') || 'direct'; // 'direct' or 'embed'
+
+    // DOM Elements
+    const settingsModal = document.getElementById('settings-modal');
+    const playerOverlay = document.getElementById('player-overlay');
+    const iframePlayer = document.getElementById('tv-youtube-iframe');
+
+    /* Initialize App */
+    window.addEventListener('DOMContentLoaded', () => {
+      updateCounts();
+      updateModeUI();
+      setupFocusEngine();
+    });
+
+    /* Save to Local Storage */
+    function saveLibrary() {
+      localStorage.setItem('yoga_tv_library', JSON.stringify(yogaLibrary));
+      updateCounts();
+    }
+
+    /* Update Video Counts UI */
+    function updateCounts() {
+      document.getElementById('count-stretch').innerText = `${yogaLibrary.stretch.length} videos`;
+      document.getElementById('count-power').innerText = `${yogaLibrary.power.length} videos`;
+      document.getElementById('count-relax').innerText = `${yogaLibrary.relax.length} videos`;
+
+      const total = yogaLibrary.stretch.length + yogaLibrary.power.length + yogaLibrary.relax.length;
+      document.getElementById('total-library-count').innerText = `Total: ${total} Videos`;
+    }
+
+    /* Set Play Mode */
+    function setPlayMode(mode) {
+      playMode = mode;
+      localStorage.setItem('yoga_tv_mode', mode);
+      updateModeUI();
+    }
+
+    function updateModeUI() {
+      const btnDirect = document.getElementById('btn-mode-youtube');
+      const btnEmbed = document.getElementById('btn-mode-embed');
+
+      if (playMode === 'direct') {
+        btnDirect.className = "tv-focusable text-xs py-2 px-3 rounded-lg border border-teal-brand/80 bg-teal-brand/30 text-teal-soft font-bold text-center shadow-lg";
+        btnEmbed.className = "tv-focusable text-xs py-2 px-3 rounded-lg border border-slate-700 bg-slate-800 text-slate-400 text-center";
+      } else {
+        btnEmbed.className = "tv-focusable text-xs py-2 px-3 rounded-lg border border-purple-brand/80 bg-purple-brand/30 text-purple-soft font-bold text-center shadow-lg";
+        btnDirect.className = "tv-focusable text-xs py-2 px-3 rounded-lg border border-slate-700 bg-slate-800 text-slate-400 text-center";
+      }
+    }
+
+    /* Core Launch Logic */
+    function launchPractice(category) {
+      const list = yogaLibrary[category];
+      if (!list || list.length === 0) {
+        alert("No videos found in this category! Add some in settings.");
+        return;
+      }
+
+      const randomIdx = Math.floor(Math.random() * list.length);
+      const selected = list[randomIdx];
+      const videoId = typeof selected === 'object' ? selected.id : selected;
+
+      playVideoId(videoId);
+    }
+
+    function launchRandomSurprise() {
+      const categories = ['stretch', 'power', 'relax'];
+      const randomCat = categories[Math.floor(Math.random() * categories.length)];
+      launchPractice(randomCat);
+    }
+
+    function playVideoId(videoId) {
+      if (playMode === 'direct') {
+        // Direct redirect to YouTube (Opens TV Native YouTube app or full page)
+        window.location.href = `https://www.youtube.com/watch?v=${videoId}`;
+      } else {
+        // Open embedded fullscreen iframe player
+        iframePlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&rel=0`;
+        playerOverlay.classList.remove('hidden');
+        playerOverlay.classList.add('flex');
+      }
+    }
+
+    function closePlayer() {
+      iframePlayer.src = '';
+      playerOverlay.classList.add('hidden');
+      playerOverlay.classList.remove('flex');
+    }
+
+    /* Extract Video ID helper */
+    function extractVideoId(input) {
+      const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+      const match = input.match(regex);
+      return match ? match[1] : (input.length === 11 ? input : null);
+    }
+
+    /* Modal Management */
+    function openSettings() {
+      renderVideoList();
+      settingsModal.classList.remove('hidden');
+    }
+
+    function closeSettings() {
+      settingsModal.classList.add('hidden');
+    }
+
+    function addCustomVideo() {
+      const catSelect = document.getElementById('new-category').value;
+      const rawInput = document.getElementById('new-videoid').value.trim();
+      
+      const videoId = extractVideoId(rawInput);
+      if (!videoId) {
+        alert("Please enter a valid YouTube Video ID or URL.");
+        return;
+      }
+
+      yogaLibrary[catSelect].push({
+        id: videoId,
+        title: `Custom Practice (${videoId})`
+      });
+
+      saveLibrary();
+      renderVideoList();
+      document.getElementById('new-videoid').value = '';
+    }
+
+    function removeVideo(category, index) {
+      yogaLibrary[category].splice(index, 1);
+      saveLibrary();
+      renderVideoList();
+    }
+
+    function resetLibraryToDefault() {
+      if (confirm("Reset yoga library back to default videos?")) {
+        yogaLibrary = JSON.parse(JSON.stringify(DEFAULT_LIBRARY));
+        saveLibrary();
+        renderVideoList();
+      }
+    }
+
+    function renderVideoList() {
+      const container = document.getElementById('video-list-container');
+      container.innerHTML = '';
+
+      ['stretch', 'power', 'relax'].forEach(cat => {
+        const catName = cat === 'stretch' ? '15 Min Stretch' : cat === 'power' ? '30 Min Power' : '20 Min Relax';
+        const items = yogaLibrary[cat];
+
+        let html = `
+          <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+            <h5 class="font-bold text-xs uppercase tracking-wider text-teal-brand mb-2">${catName}</h5>
+            <div class="space-y-1.5">
+        `;
+
+        if (items.length === 0) {
+          html += `<p class="text-xs text-slate-500 italic">No videos added.</p>`;
+        } else {
+          items.forEach((item, idx) => {
+            const vId = typeof item === 'object' ? item.id : item;
+            const vTitle = typeof item === 'object' ? item.title : vId;
+            html += `
+              <div class="flex items-center justify-between bg-slate-900 p-2 rounded border border-slate-800 text-xs">
+                <span class="truncate pr-2 font-mono text-slate-300">${vTitle}</span>
+                <button tabindex="0" onclick="removeVideo('${cat}', ${idx})" class="tv-focusable text-rose-400 hover:text-rose-300 px-2 py-1 bg-rose-950/40 rounded border border-rose-900/30">
+                  Delete
+                </button>
+              </div>
+            `;
+          });
+        }
+
+        html += `</div></div>`;
+        container.innerHTML += html;
+      });
+    }
+
+    /* D-Pad & Keyboard Remote Navigation Engine */
+    function setupFocusEngine() {
+      const focusables = Array.from(document.querySelectorAll('.tv-focusable, button, select, input, [tabindex="0"]'));
+      
+      // Auto-focus first button on load
+      const firstBtn = document.getElementById('btn-stretch');
+      if (firstBtn) firstBtn.focus();
+
+      // Spatial navigation handler for Arrow keys
+      document.addEventListener('keydown', (e) => {
+        const active = document.activeElement;
+        
+        // Ensure standard D-Pad / Arrow Key navigation across TV browsers
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+          const currentFocusables = Array.from(document.querySelectorAll('.tv-focusable, button, select, input, [tabindex="0"]'))
+            .filter(el => el.offsetParent !== null); // only visible elements
+
+          const activeIdx = currentFocusables.indexOf(active);
+
+          if (activeIdx === -1 && currentFocusables.length > 0) {
+            currentFocusables[0].focus();
+            return;
+          }
+
+          let nextIdx = activeIdx;
+
+          if (e.key === 'ArrowDown') {
+            nextIdx = (activeIdx + 1) % currentFocusables.length;
+            e.preventDefault();
+          } else if (e.key === 'ArrowUp') {
+            nextIdx = (activeIdx - 1 + currentFocusables.length) % currentFocusables.length;
+            e.preventDefault();
+          } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+            // Simple grid shift
+            if (e.key === 'ArrowRight') nextIdx = Math.min(activeIdx + 1, currentFocusables.length - 1);
+            if (e.key === 'ArrowLeft') nextIdx = Math.max(activeIdx - 1, 0);
+            e.preventDefault();
+          }
+
+          if (currentFocusables[nextIdx]) {
+            currentFocusables[nextIdx].focus();
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html><!DOCTYPE html>
 <html>
     <head>
         <title>Yoga with Kipodit</title>
