@@ -38,22 +38,26 @@
         .tv-focusable.is-focused,
         .tv-focusable:hover {
             background-color: #5eead4 !important; /* Pastel Teal */
-            color: #0f172a !important; /* Dark Slate text for high contrast */
             border-color: #99f6e4 !important;
             transform: scale(1.02);
             z-index: 20;
         }
 
-        /* Focus subtle glow badge inside elements */
-        .tv-focusable:focus .highlight-text,
-        .tv-focusable:hover .highlight-text {
+        /* Force ALL child text, spans, headings, and icons inside focused elements to dark slate */
+        .tv-focusable:focus,
+        .tv-focusable:focus *,
+        .tv-focusable.is-focused,
+        .tv-focusable.is-focused *,
+        .tv-focusable:hover,
+        .tv-focusable:hover * {
             color: #0f172a !important;
+            fill: #0f172a !important;
         }
 
+        /* Focus subtle glow badge inside elements */
         .tv-focusable:focus .badge-accent,
         .tv-focusable:hover .badge-accent {
             background-color: rgba(15, 23, 42, 0.15) !important;
-            color: #0f172a !important;
         }
 
         /* Pulsing indicator for active TV remote feel */
@@ -68,7 +72,7 @@
 <body class="flex flex-col justify-center gap-3 md:gap-4 p-4 md:p-6 lg:p-8 h-screen w-screen max-w-[1920px] mx-auto select-none">
 
     <!-- TOP ROW BUTTON -->
-    <header class="w-full">
+    <header class="w-full mb-3 md:mb-5">
         <button 
             id="top-button"
             tabindex="0"
