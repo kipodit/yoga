@@ -131,6 +131,40 @@
     <div class="status-toast" id="statusToast">Selected: Option 1</div>
 
     <script>
+        document.addEventListener('keydown', (event) => {
+  const key = event.key;
+  const code = event.keyCode;
+
+  // DPAD Down / ArrowDown (KeyCode 40)
+  const isDown = key === 'ArrowDown' || code === 40;
+  // DPAD Up / ArrowUp (KeyCode 38)
+  const isUp = key === 'ArrowUp' || code === 38;
+
+  if (!isDown && !isUp) return;
+
+  // Find all focusable elements in the page
+  const focusables = Array.from(
+    document.querySelectorAll('button, a[href], input, select, textarea, [tabindex="0"]')
+  ).filter(el => !el.disabled && el.offsetParent !== null); // Ensure element is visible
+
+  if (focusables.length === 0) return;
+
+  // Find current focused element
+  const currentIndex = focusables.indexOf(document.activeElement);
+
+  let nextIndex;
+  if (isDown) {
+    // Move to NEXT element (mimics Tab)
+    nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % focusables.length;
+  } else if (isUp) {
+    // Move to PREVIOUS element (mimics Shift + Tab)
+    nextIndex = currentIndex <= 0 ? focusables.length - 1 : currentIndex - 1;
+  }
+
+  // Focus the element and prevent default browser scrolling/pointer behavior
+  event.preventDefault();
+  focusables[nextIndex].focus();
+});
         document.addEventListener('DOMContentLoaded', () => {
             const buttons = Array.from(document.querySelectorAll('.nav-button'));
             const statusToast = document.getElementById('statusToast');
