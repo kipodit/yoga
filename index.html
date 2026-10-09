@@ -1,251 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Android TV DPAD Navigation Demo</title>
-    
-    <style>
-        /* Viewport reset to prevent scrolling on TV screens */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none; /* Disable text selection on TV interactions */
-            -webkit-user-select: none;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Native DPAD Grid</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #ffffff; /* Plain white background as requested */
-            color: #111111;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden; /* Prevent scrolling for standard TV layouts */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 3vw;
-        }
+    body {
+      background-color: #ffffff;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden; /* Prevents unwanted TV scrolling */
+    }
 
-        /* Title / instruction header */
-        .header {
-            text-align: center;
-            margin-bottom: 2vh;
-        }
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 24px;
+      width: 80vw;
+      height: 80vh;
+    }
 
-        .header h1 {
-            font-size: 2vw;
-            font-weight: 600;
-            margin-bottom: 0.5vh;
-            color: #222222;
-        }
+    .tv-button {
+      background-color: #e0e0e0;
+      border: 4px solid #b0b0b0;
+      border-radius: 12px;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #333333;
+      cursor: pointer;
+      outline: none;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
 
-        .header p {
-            font-size: 1.2vw;
-            color: #666666;
-        }
-
-        /* 2-Column x 3-Row Grid Container */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 2.5vw;
-            width: 80vw;
-            height: 70vh;
-            max-width: 1200px;
-        }
-
-        /* Standard Focusable Button Base Style */
-        .nav-button {
-            background-color: #f0f0f0; /* Default neutral background */
-            border: 3px solid #cccccc;   /* Visible border in unfocused state */
-            border-radius: 12px;
-            font-size: 2.2vw;
-            font-weight: bold;
-            color: #333333;
-            cursor: pointer;
-            outline: none; /* Hide standard browser outline to use custom high-contrast focus style */
-            transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        /* 
-           ANDROID TV FOCUS BEST PRACTICE:
-           High contrast color change + subtle scale transform for immediate 10-foot legibility
-        */
-        .nav-button:focus,
-        .nav-button.focused {
-            background-color: #000000;  /* Bold black background on focus */
-            color: #ffffff;             /* White text on focus */
-            border-color: #000000;
-            transform: scale(1.04);     /* Scale indicator to signify selection */
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25); /* Visual elevation depth */
-        }
-
-        /* Active feedback trigger when DPAD Center / Enter is pressed */
-        .nav-button:active {
-            transform: scale(0.98);
-        }
-
-        /* Status message box to display DPAD interactions */
-        .status-toast {
-            position: fixed;
-            bottom: 3vh;
-            background: #f4f4f4;
-            border: 1px solid #ddd;
-            padding: 0.8em 1.5em;
-            border-radius: 20px;
-            font-size: 1.1vw;
-            color: #444;
-            font-weight: 500;
-        }
-    </style>
+    /* Target both standard native focus and manual JavaScript focus classes */
+    .tv-button:focus,
+    .tv-button.focused {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+      border-color: #000000 !important;
+      transform: scale(1.03);
+    }
+  </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Android TV DPAD Navigation</h1>
-        <p>Use Up / Down / Left / Right on your DPAD or keyboard arrow keys</p>
-    </div>
+  <div class="grid-container">
+    <button class="tv-button" tabindex="0">Option 1</button>
+    <button class="tv-button" tabindex="0">Option 2</button>
+    <button class="tv-button" tabindex="0">Option 3</button>
+    <button class="tv-button" tabindex="0">Option 4</button>
+    <button class="tv-button" tabindex="0">Option 5</button>
+    <button class="tv-button" tabindex="0">Option 6</button>
+  </div>
 
-    <!-- 
-       DPAD spatial navigation works natively using <button> elements with tabindex="0".
-       Each button is arranged in a 2-column, 3-row layout structure.
-    -->
-    <main class="grid-container" id="gridContainer">
-        <button class="nav-button" tabindex="0" data-index="0">Option 1</button>
-        <button class="nav-button" tabindex="0" data-index="1">Option 2</button>
-        <button class="nav-button" tabindex="0" data-index="2">Option 3</button>
-        <button class="nav-button" tabindex="0" data-index="3">Option 4</button>
-        <button class="nav-button" tabindex="0" data-index="4">Option 5</button>
-        <button class="nav-button" tabindex="0" data-index="5">Option 6</button>
-    </main>
+  <script>
+    const buttons = Array.from(document.querySelectorAll('.tv-button'));
+    let currentIndex = 0;
 
-    <!-- Status toast displaying active user selection -->
-    <div class="status-toast" id="statusToast">Selected: Option 1</div>
+    // Helper to focus a button index and highlight it explicitly
+    function setFocus(index) {
+      if (index < 0 || index >= buttons.length) return;
+      
+      buttons.forEach(btn => {
+        btn.classList.remove('focused');
+        btn.blur();
+      });
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const buttons = Array.from(document.querySelectorAll('.nav-button'));
-            const statusToast = document.getElementById('statusToast');
-            const COLUMNS = 2;
-            const TOTAL_ITEMS = buttons.length;
-            let currentIndex = 0;
+      currentIndex = index;
+      buttons[currentIndex].classList.add('focused');
+      buttons[currentIndex].focus();
+    }
 
-            // ANDROID TV BEST PRACTICE: Auto-focus the primary/first item upon page launch
-            function initFocus() {
-                if (buttons.length > 0) {
-                    buttons[0].focus();
-                    updateStatus(0);
-                }
-            }
+    // Explicit 2x3 Spatial Navigation Math
+    document.addEventListener('keydown', (e) => {
+      // Key codes for DPAD/Arrow keys & TV Remote Enter
+      const key = e.key;
+      const code = e.keyCode;
 
-            // Helper to focus button at a specific index cleanly
-            function setFocusToIndex(index) {
-                if (index >= 0 && index < TOTAL_ITEMS) {
-                    currentIndex = index;
-                    buttons[currentIndex].focus();
-                    updateStatus(currentIndex);
-                }
-            }
+      // Handle Left (ArrowLeft or DPAD Left - KeyCode 37)
+      if (key === 'ArrowLeft' || code === 37) {
+        if (currentIndex % 2 !== 0) setFocus(currentIndex - 1);
+        e.preventDefault();
+      } 
+      // Handle Right (ArrowRight or DPAD Right - KeyCode 39)
+      else if (key === 'ArrowRight' || code === 39) {
+        if (currentIndex % 2 === 0) setFocus(currentIndex + 1);
+        e.preventDefault();
+      } 
+      // Handle Up (ArrowUp or DPAD Up - KeyCode 38)
+      else if (key === 'ArrowUp' || code === 38) {
+        if (currentIndex >= 2) setFocus(currentIndex - 2);
+        e.preventDefault();
+      } 
+      // Handle Down (ArrowDown or DPAD Down - KeyCode 40)
+      else if (key === 'ArrowDown' || code === 40) {
+        if (currentIndex <= 3) setFocus(currentIndex + 2);
+        e.preventDefault();
+      }
+      // Handle Select/Enter (Enter / DPAD Center - KeyCode 13 or 23)
+      else if (key === 'Enter' || code === 13 || code === 23) {
+        buttons[currentIndex].click();
+        e.preventDefault();
+      }
+    });
 
-            // Update user status display when focused or clicked
-            function updateStatus(index) {
-                statusToast.textContent = `Focused: Option ${index + 1}`;
-            }
-
-            buttons.forEach((button, index) => {
-                // Focus event listener to sync index if mouse hover/click occurs
-                button.addEventListener('focus', () => {
-                    currentIndex = index;
-                    updateStatus(index);
-                });
-
-                // Enter / DPAD Center press action
-                button.addEventListener('click', () => {
-                    statusToast.textContent = `Activated: Option ${index + 1}!`;
-                    
-                    // Quick flash feedback effect
-                    button.style.backgroundColor = '#2563eb';
-                    setTimeout(() => {
-                        button.style.backgroundColor = '';
-                    }, 200);
-                });
-            });
-
-            /*
-               Deterministic Spatial Navigation Math for 2-column grid:
-               - Left:  currentIndex - 1 (if not in column 0)
-               - Right: currentIndex + 1 (if not in column 1)
-               - Up:    currentIndex - 2
-               - Down:  currentIndex + 2
-            */
-            window.addEventListener('keydown', (event) => {
-                // KeyCodes supported: Standard TV Remote DPAD & Keyboard Arrow Keys
-                const keyCode = event.keyCode || event.which;
-
-                switch (event.key) {
-                    case 'ArrowLeft':
-                    case 'Left':
-                    case '37':
-                        if (currentIndex % COLUMNS !== 0) {
-                            setFocusToIndex(currentIndex - 1);
-                            event.preventDefault();
-                        }
-                        break;
-
-                    case 'ArrowRight':
-                    case 'Right':
-                    case '39':
-                        if (currentIndex % COLUMNS < COLUMNS - 1 && currentIndex + 1 < TOTAL_ITEMS) {
-                            setFocusToIndex(currentIndex + 1);
-                            event.preventDefault();
-                        }
-                        break;
-
-                    case 'ArrowUp':
-                    case 'Up':
-                    case '38':
-                        if (currentIndex - COLUMNS >= 0) {
-                            setFocusToIndex(currentIndex - COLUMNS);
-                            event.preventDefault();
-                        }
-                        break;
-
-                    case 'ArrowDown':
-                    case 'Down':
-                    case '40':
-                        if (currentIndex + COLUMNS < TOTAL_ITEMS) {
-                            setFocusToIndex(currentIndex + COLUMNS);
-                            event.preventDefault();
-                        }
-                        break;
-
-                    case 'Enter':
-                    case 'Select':
-                    case '13':
-                    case '66': // Android KEYCODE_NUMPAD_ENTER / DPAD_CENTER
-                        // Native click is automatically dispatched for focused HTML <button>,
-                        // but prevent scrolling on keypresses
-                        if (document.activeElement === buttons[currentIndex]) {
-                            // Click event handles action
-                        }
-                        break;
-
-                    default:
-                        break;
-                }
-            });
-
-            // Initialize focus once DOM is ready
-            initFocus();
-        });
-    </script>
+    // Auto focus first button on load
+    window.addEventListener('DOMContentLoaded', () => setFocus(0));
+  </script>
 </body>
 </html>
