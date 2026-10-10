@@ -303,6 +303,9 @@
             ];
             const currentMonthYear = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
             const dayOfMonth = now.getDate();
+			
+			// Always fetch and reference topBtn in function scope so it's accessible in catch
+			const topBtn = document.getElementById('top-button');
 
             try {
                 // 1. Search for current month playlist in channel
@@ -345,13 +348,12 @@
                 document.getElementById('video-duration').textContent = formattedDuration;
 
                 // Configure click handler on top button
-                const topBtn = document.getElementById('top-button');
                 topBtn.onclick = () => openYouTubeVideo(videoId);
 
             } catch (err) {
                 console.error('Error fetching YouTube video:', err);
-                document.getElementById('video-title').textContent = "Calendar";
-                document.getElementById('video-duration').textContent = "📅";
+                document.getElementById('video-title').textContent = "YWA Calendar";
+                document.getElementById('video-duration').innerHTML = '<i class="fa-solid fa-calendar-day"></i>';
 				topBtn.onclick = function openCalendar() {
 					window.location.href = 'https://fwfg.com/calendar';
 				};
