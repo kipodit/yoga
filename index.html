@@ -10,660 +10,613 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <style>
-        * {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            outline: none;
-            user-select: none;
-            -webkit-user-select: none;
-        }
 
-        /* Dark Pastel Purple Background Theme */
-        body {
-            background: linear-gradient(135deg, #1f1a2e 0%, #2a223f 50%, #362c52 100%);
-            color: #ece8f5;
-            min-height: 100vh;
-            overflow: hidden; /* Prevent scrolling on Android TV */
-        }
+<style>
+    * {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        outline: none;
+        user-select: none;
+        -webkit-user-select: none;
+    }
 
-        /* Default Unfocused Button Target Styles */
-        .tv-focusable {
-            position: relative;
-            background-color: rgba(255, 255, 255, 0.08);
-            border: 3px solid rgba(255, 255, 255, 0.12);
-            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-            cursor: pointer;
-            backdrop-filter: blur(8px);
-            color: #ece8f5;
-        }
+    /* Dark Pastel Purple Background Theme */
+    body {
+        background-color: #1f1a2e;
+        color: #ece8f5;
+        min-height: 100vh;
+        overflow: hidden; /* Prevent scrolling on Android TV */
+    }
 
-        /* Selected State Styling for Filter Buttons */
-        .tv-focusable.is-selected {
-            background-color: rgba(13, 148, 136, 0.35) !important;
-            border-color: #2dd4bf !important;
-        }
+    /* Default Unfocused Interactive Target Styles */
+    .tv-focusable {
+        position: relative;
+        background-color: rgba(255, 255, 255, 0.08);
+        border: 3px solid rgba(255, 255, 255, 0.12);
+        transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        color: #ece8f5;
+    }
 
-        .tv-focusable.is-selected .check-indicator {
-            opacity: 1 !important;
-            transform: scale(1) !important;
-        }
+    /* Selected State Styling for Filter Toggle Buttons */
+    .tv-focusable.is-selected {
+        background-color: rgba(13, 148, 136, 0.35) !important;
+        border-color: #2dd4bf !important;
+    }
 
-        /* Rich Darker Teal Focus Highlights with Crisp White Text - optimized for Android TV D-pad & remote */
-        .tv-focusable:focus,
-        .tv-focusable.is-focused,
-        .tv-focusable:hover {
-            background-color: #0d9488 !important; /* Rich Dark Teal */
-            border-color: #5eead4 !important;      /* Soft Pastel Teal Glowing Border */
-            color: #ffffff !important;             /* Pure White Text */
-            transform: scale(1.010);
-            z-index: 20;
-        }
+    .tv-focusable.is-selected .check-indicator {
+        opacity: 1 !important;
+        transform: scale(1) !important;
+    }
 
-        /* Ensure ALL nested text, spans, headers, and SVG icons remain crisp white on focus */
-        .tv-focusable:focus *,
-        .tv-focusable.is-focused *,
-        .tv-focusable:hover * {
-            color: #ffffff !important;
-            fill: #ffffff !important;
-            stroke: #ffffff !important;
-        }
+    /* Rich Darker Teal Focus Highlights - optimized for Android TV D-pad & remote navigation */
+    .tv-focusable:focus,
+    .tv-focusable.is-focused,
+    .tv-focusable:hover {
+        background-color: #0d9488 !important; /* Rich Dark Teal */
+        border-color: #5eead4 !important;      /* Soft Pastel Teal Glowing Border */
+        color: #ffffff !important;             /* Pure White Text */
+        transform: scale(1.010);
+        z-index: 20;
+    }
 
-        /* Highlight text inside focused buttons */
-        .tv-focusable:focus .highlight-text,
-        .tv-focusable.is-focused .highlight-text,
-        .tv-focusable:hover .highlight-text {
-            color: #ffffff !important;
-        }
+    /* Ensure ALL nested text, spans, headers, and SVG icons remain crisp white on focus */
+    .tv-focusable:focus *,
+    .tv-focusable.is-focused *,
+    .tv-focusable:hover * {
+        color: #ffffff !important;
+        fill: #ffffff !important;
+        stroke: #ffffff !important;
+    }
 
-        /* Accent badges inside focused elements */
-        .tv-focusable:focus .badge-accent,
-        .tv-focusable.is-focused .badge-accent,
-        .tv-focusable:hover .badge-accent {
-            background-color: rgba(255, 255, 255, 0.2) !important;
-            color: #ffffff !important;
-        }
-    </style>
+    /* Highlight text inside focused buttons */
+    .tv-focusable:focus .highlight-text,
+    .tv-focusable.is-focused .highlight-text,
+    .tv-focusable:hover .highlight-text {
+        color: #ffffff !important;
+    }
+
+    /* Accent badges inside focused elements */
+    .tv-focusable:focus .badge-accent,
+    .tv-focusable.is-focused .badge-accent,
+    .tv-focusable:hover .badge-accent {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        color: #ffffff !important;
+    }
+</style>
 </head>
 <body class="flex flex-col justify-center gap-2 md:gap-3 p-4 md:p-6 lg:p-8 h-screen w-screen max-w-[1920px] mx-auto select-none">
 
-    <!-- TOP ROW BUTTON -->
-    <header class="w-full mb-1">
-        <button 
-            id="top-button"
-            tabindex="0"
-            autofocus
-            class="tv-focusable w-full rounded-2xl p-3.5 md:p-4 flex items-center justify-between shadow-xl text-left transition-all"
-        >
-            <!-- Left Side: Date Block & Video Title -->
-            <div class="flex items-center space-x-4">
-                <div class="flex flex-col items-center justify-center bg-purple-500/30 badge-accent px-3 py-1.5 rounded-xl min-w-[65px] transition-colors">
-                    <span id="date-day-name" class="text-[10px] font-bold tracking-widest uppercase opacity-80">---</span>
-                    <span id="date-day-num" class="text-xl font-extrabold leading-none my-0.5">--</span>
-                    <span id="date-month-name" class="text-[10px] font-bold tracking-wider uppercase opacity-80">---</span>
-                </div>
-                <div>
-                    <h1 id="video-title" class="text-base md:text-lg font-bold tracking-tight highlight-text">...</h1>
-                </div>
+<!-- TOP ROW BUTTON: Daily Video from Monthly Playlist -->
+<header class="w-full mb-1">
+    <button 
+        id="top-button"
+        tabindex="0"
+        autofocus
+        class="tv-focusable w-full rounded-2xl p-3.5 md:p-4 flex items-center justify-between shadow-xl text-left transition-all"
+    >
+        <!-- Left Side: Date Block & Video Title -->
+        <div class="flex items-center space-x-4">
+            <div class="flex flex-col items-center justify-center bg-purple-900/40 badge-accent px-3 py-1.5 rounded-xl min-w-[65px] transition-colors">
+                <span id="date-day-name" class="text-[10px] font-bold tracking-widest uppercase opacity-80">---</span>
+                <span id="date-day-num" class="text-xl font-extrabold leading-none my-0.5">--</span>
+                <span id="date-month-name" class="text-[9px] font-bold tracking-wider uppercase opacity-80">---</span>
             </div>
-
-            <!-- Right Side: Duration -->
-            <div class="flex items-center space-x-3">
-                <span id="video-duration" class="badge-accent bg-purple-500/30 text-purple-200 px-3 py-1 rounded-lg text-xs md:text-sm font-bold transition-colors">
-                    -- min
-                </span>
+            <div>
+                <h1 id="video-title" class="text-base md:text-lg font-bold tracking-tight highlight-text">...</h1>
             </div>
-        </button>
-    </header>
-
-    <!-- STREAK TRACKER PILL (Between Top Button and Divider) -->
-    <div class="w-full flex justify-end px-1 my-0.5">
-        <div id="streak-pill" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[12px] font-bold text-white shadow-md bg-yellow-600">
-            <i class="fa-solid fa-fire text-orange-300"></i>
-            <span id="streak-count-text">0 day streak</span>
         </div>
-    </div>
 
-    <!-- SUBTLE GLOWING HORIZONTAL DIVIDER -->
-    <div class="w-full my-1 md:my-2 flex items-center justify-center">
-        <div class="w-full h-[1px] bg-gradient-to-r from-transparent via-purple-300/30 to-transparent"></div>
-    </div>
+        <!-- Right Side: Duration Badge -->
+        <div class="flex items-center space-x-3">
+            <span id="video-duration" class="badge-accent bg-purple-900/40 text-purple-200 px-3 py-1 rounded-lg text-xs md:text-sm font-bold transition-colors">
+                -- min
+            </span>
+        </div>
+    </button>
+</header>
 
-    <!-- MIDDLE ROW: TWO COLUMNS -->
-    <main class="grid grid-cols-2 gap-4 w-full my-1">
-        <!-- LEFT COLUMN: DURATION -->
-        <section class="flex flex-col space-y-1.5">
-            <h2 class="text-xs md:text-sm font-extrabold tracking-wider text-purple-200/80 uppercase px-2 flex items-center gap-2">
-                <i class="fa-solid fa-clock text-purple-300 text-sm"></i>
-                Duration
-            </h2>
-            <div class="flex flex-col space-y-1.5" id="duration-column">
-                <button tabindex="0" data-type="duration" data-min="15" data-max="30" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
-                    <span>15-30 min</span>
-                    <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
-                </button>
-                <button tabindex="0" data-type="duration" data-min="30" data-max="45" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
-                    <span>30-45 min</span>
-                    <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
-                </button>
-                <button tabindex="0" data-type="duration" data-min="45" data-max="60" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
-                    <span>45-60 min</span>
-                    <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
-                </button>
+<!-- SUBTLE GLOWING HORIZONTAL DIVIDER -->
+<div class="w-full my-1 md:my-2 flex items-center justify-center">
+    <div class="w-full h-[0px]"></div>
+</div>
+<div class="w-full my-1 md:my-2 flex items-center justify-center">
+    <div class="w-full h-[1px] bg-gradient-to-r from-transparent via-purple-300/30 to-transparent"></div>
+</div>
+
+<!-- MIDDLE ROW: TWO FILTER COLUMNS -->
+<main class="grid grid-cols-2 gap-4 w-full my-1">
+    <!-- LEFT COLUMN: DURATION FILTERS -->
+    <section class="flex flex-col space-y-1.5">
+        <h2 class="text-xs md:text-sm font-extrabold tracking-wider text-purple-200/80 uppercase px-2 flex items-center gap-2">
+            <i class="fa-solid fa-clock text-purple-300 text-sm"></i>
+            Duration
+        </h2>
+        <div class="flex flex-col space-y-1.5" id="duration-column">
+            <button tabindex="0" data-type="duration" data-min="15" data-max="30" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
+                <span>15-30 min</span>
+                <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
+            </button>
+            <button tabindex="0" data-type="duration" data-min="30" data-max="45" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
+                <span>30-45 min</span>
+                <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
+            </button>
+            <button tabindex="0" data-type="duration" data-min="45" data-max="60" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
+                <span>45-60 min</span>
+                <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- RIGHT COLUMN: FOCUS FILTERS -->
+    <section class="flex flex-col space-y-1.5">
+        <h2 class="text-xs md:text-sm font-extrabold tracking-wider text-purple-200/80 uppercase px-2 flex items-center gap-2">
+            <i class="fa-solid fa-spa text-purple-300 text-sm"></i>
+            Focus
+        </h2>
+        <div class="flex flex-col space-y-1.5" id="focus-column">
+            <button tabindex="0" data-type="focus" data-value="relax" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
+                <span>relax</span>
+                <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
+            </button>
+            <button tabindex="0" data-type="focus" data-value="stretch" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
+                <span>stretch</span>
+                <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
+            </button>
+            <button tabindex="0" data-type="focus" data-value="energize" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
+                <span>energize</span>
+                <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
+            </button>
+        </div>
+    </section>
+</main>
+
+<!-- BOTTOM ROW BUTTON: Filtered Video Player Trigger -->
+<footer class="w-full mt-1">
+    <button 
+        id="bottom-button"
+        tabindex="0" 
+        class="tv-focusable w-full rounded-2xl p-3.5 md:p-4 flex items-center justify-between shadow-2xl text-left"
+    >
+        <!-- Left Side: Play Icon & Video Title -->
+        <div class="flex items-center space-x-4">
+            <div class="bg-purple-500/30 badge-accent p-2.5 rounded-xl flex items-center justify-center transition-colors">
+                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
             </div>
-        </section>
-
-        <!-- RIGHT COLUMN: FOCUS -->
-        <section class="flex flex-col space-y-1.5">
-            <h2 class="text-xs md:text-sm font-extrabold tracking-wider text-purple-200/80 uppercase px-2 flex items-center gap-2">
-                <i class="fa-solid fa-spa text-purple-300 text-sm"></i>
-                Focus
-            </h2>
-            <div class="flex flex-col space-y-1.5" id="focus-column">
-                <button tabindex="0" data-type="focus" data-value="relax" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
-                    <span>relax</span>
-                    <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
-                </button>
-                <button tabindex="0" data-type="focus" data-value="stretch" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
-                    <span>stretch</span>
-                    <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
-                </button>
-                <button tabindex="0" data-type="focus" data-value="energize" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
-                    <span>energize</span>
-                    <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
-                </button>
+            <div>
+                <h2 id="bottom-video-title" class="text-base md:text-lg font-bold highlight-text">Total Body Yoga | Deep Stretch | 45-Minute Yoga Practice</h2>
             </div>
-        </section>
-    </main>
+        </div>
 
-    <!-- BOTTOM ROW BUTTON -->
-    <footer class="w-full mt-1">
-        <button 
-            id="bottom-button"
-            tabindex="0" 
-            class="tv-focusable w-full rounded-2xl p-3.5 md:p-4 flex items-center justify-between shadow-2xl text-left"
-        >
-            <!-- Left Side: PLAY Label & Title -->
-            <div class="flex items-center space-x-4">
-                <div class="bg-purple-500/30 badge-accent p-2.5 rounded-xl flex items-center justify-center transition-colors">
-                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h2 id="bottom-video-title" class="text-base md:text-lg font-bold highlight-text">Total Body Yoga | Deep Stretch | 45-Minute Yoga Practice</h2>
-                </div>
-            </div>
+        <!-- Right Side: Duration Badge -->
+        <div class="flex items-center space-x-3">
+            <span id="bottom-video-duration" class="badge-accent bg-purple-900/40 text-purple-200 px-3 py-1 rounded-lg text-xs md:text-sm font-bold transition-colors">
+                45 min
+            </span>
+        </div>
+    </button>
+</footer>
 
-            <!-- Right Side: Duration -->
-            <div class="flex items-center space-x-3">
-                <span id="bottom-video-duration" class="badge-accent bg-purple-500/30 text-purple-200 px-3 py-1 rounded-lg text-xs md:text-sm font-bold transition-colors">
-                    45 min
-                </span>
-            </div>
-        </button>
-    </footer>
+<script>
+    /**
+     * APPLICATION CONFIGURATION & CONSTANTS
+     */
+    const API_KEY = 'AIzaSyC7cTA9VoTfR4NiSOv9Uh9bJX70kqNbu9U';
+    const CHANNEL_ID = 'UCFKE7WVJfvaHW5q283SxchA'; // Yoga with Adriene YouTube Channel ID
 
-    <script>
-        // Constants
-        const API_KEY = 'AIzaSyC7cTA9VoTfR4NiSOv9Uh9bJX70kqNbu9U';
-        const CHANNEL_ID = 'UCFKE7WVJfvaHW5q283SxchA';
+    // Fallback video details used when filters are inactive or API requests fail
+    const DEFAULT_VIDEO = {
+        id: 'GLy2rYHwUqY',
+        title: 'Total Body Yoga | Deep Stretch | 45-Minute Yoga Practice',
+        duration: '45 min'
+    };
 
-        // Default video details
-        const DEFAULT_VIDEO = {
-            id: 'GLy2rYHwUqY',
-            title: 'Total Body Yoga | Deep Stretch | 45-Minute Yoga Practice',
-            duration: '45 min'
+    /**
+     * APPLICATION STATE
+     */
+    let currentSelectedDuration = null; // Stores active duration filter: { min: number, max: number } | null
+    let currentSelectedFocus = null;    // Stores active focus filter: 'relax' | 'stretch' | 'energize' | null
+    let activeBottomVideoId = DEFAULT_VIDEO.id; // Currently loaded video ID for bottom button click handler
+    const videoCache = new Map();       // In-memory cache to store API query results and avoid duplicate fetches
+
+    /**
+     * TAXONOMY & KEYWORD MAPPINGS
+     */
+    const FOCUS_KEYWORDS = {
+        relax: [
+            'relax', 'sleep', 'stress', 'slow', 'gentle', 'night', 'bed', 
+            'soft', 'calm', 'unwind', 'restorative', 'cozy', 'soothe', 
+            'evening', 'peace', 'soothing', 'comfort', 'ease', 'blanket',
+            'bedtime', 'nervous', 'heart', 'cortisol', 'center', 'mental',
+            'sad', 'grief', 'overthinking', 'healing', 'tired', 'recovery',
+            'unmotivated', 'feel good', 'ease', 'pain', 'gut', 'wind down',
+            'ptsd', 'stuck', 'center', 'disaster', 'depression', 'loneliness',
+            'anxiety', 'let it go', 'focus', 'gratitude', 'angry', 'bad mood'
+        ],
+        stretch: [
+            'stretch', 'deep', 'release', 'hamstrings', 'neck', 'back', 
+            'hips', 'shoulders', 'spine', 'runners', 'dancers', 'tennis', 
+            'legs', 'flexibility', 'full body stretch', 'opening', 'joints',
+            'posture', 'tight', 'sit', 'mobility', 'calves', 'open', 'gardeners',
+            'scoliosis', 'knees', 'balance', 'manual labor', 'psoas', 'cyclists',
+            'sciatica', 'sore'
+        ],
+        energize: [
+            'power', 'energy', 'awake', 'total', 'workout', 'core', 
+            'strength', 'fiery', 'burn', 'dynamic', 'vinyasa', 'sweat', 
+            'abs', 'toned', 'strong', 'fire', 'empower', 'energize',
+            'morning', 'full', 'weight loss', 'strengthen', 'wake up',
+            'flow', 'trust', 'play', 'believe', 'discipline', 'fear',
+            'endurance'
+        ]
+    };
+
+    // Keywords used to filter out non-practice videos (e.g., meditations, pranayama, single pose tutorials)
+    const EXCLUDED_KEYWORDS = [
+        'meditation', 'pranayama', 'breathwork', 'breath work', 'guided meditation',
+        'pose breakdown', 'how to do', 'how to', 'pose',
+        'tree pose', 'crow pose', 'downward dog', 'warrior',
+        'headstand', 'handstand', 'wheel pose', 'chaturanga'
+    ];
+
+    /**
+     * UTILITY FUNCTIONS
+     */
+
+    /**
+     * Parses an ISO 8601 duration string (e.g., PT36M12S) into total minutes and a formatted string.
+     * @param {string} isoDuration - The raw ISO duration string from YouTube API.
+     * @returns {Object} An object containing { minutes: number, text: string }.
+     */
+    function parseISO8601Duration(isoDuration) {
+        if (!isoDuration) return { minutes: 0, text: '-- min' };
+        const match = isoDuration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+        if (!match) return { minutes: 0, text: '-- min' };
+        
+        const hours = parseInt(match[1] || 0, 10);
+        const minutes = parseInt(match[2] || 0, 10);
+        const totalMinutes = (hours * 60) + minutes;
+        
+        return {
+            minutes: totalMinutes,
+            text: `${totalMinutes} min`
         };
+    }
 
-        // App state
-        let currentSelectedDuration = null; // { min: number, max: number } | null
-        let currentSelectedFocus = null;    // string ('relax' | 'stretch' | 'energize') | null
-        let activeBottomVideoId = DEFAULT_VIDEO.id;
-        let videoCache = new Map();         // In-memory cache for API query responses
+    /**
+     * Opens a YouTube video via Android Intent (optimized for Android TV / TV Bro browser) with standard web fallback.
+     * @param {string} videoId - The YouTube video ID to open.
+     */
+    function openYouTubeVideo(videoId) {
+        const intentUrl = `intent://www.youtube.com/watch?v=${videoId}#Intent;package=com.google.android.youtube.tv;scheme=https;end;`;
+        const fallbackUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        
+        try {
+            window.location.href = intentUrl;
+        } catch (e) {
+            window.location.href = fallbackUrl;
+        }
+    }
 
-        // Focus keywords mapping
-        const FOCUS_KEYWORDS = {
-            relax: [
-                'relax', 'sleep', 'stress', 'slow', 'gentle', 'night', 'bed', 
-                'soft', 'calm', 'unwind', 'restorative', 'cozy', 'soothe', 
-                'evening', 'peace', 'soothing', 'comfort', 'ease', 'blanket',
-				'bedtime', 'nervous', 'heart', 'cortisol', 'center', 'mental',
-				'sad', 'grief', 'overthinking', 'healing', 'tired', 'recovery',
-				'unmotivated', 'feel good', 'ease', 'pain', 'gut', 'wind down',
-				'ptsd', 'stuck', 'center', 'disaster', 'depression', 'loneliness',
-				'anxiety', 'let it go', 'focus', 'gratitude', 'angry', 'bad mood'
-            ],
-            stretch: [
-                'stretch', 'deep', 'release', 'hamstrings', 'neck', 'back', 
-                'hips', 'shoulders', 'spine', 'runners', 'dancers', 'tennis', 
-                'legs', 'flexibility', 'full body stretch', 'opening', 'joints',
-				'posture', 'tight', 'sit', 'mobility', 'calves', 'open', 'gardeners',
-				'scoliosis', 'knees', 'balance', 'manual labor', 'psoas', 'cyclists',
-				'sciatica', 'sore'
-            ],
-            energize: [
-                'power', 'energy', 'awake', 'total', 'workout', 'core', 
-                'strength', 'fiery', 'burn', 'dynamic', 'vinyasa', 'sweat', 
-                'abs', 'toned', 'strong', 'fire', 'empower', 'energize',
-				'morning', 'full', 'weight loss', 'strengthen', 'wake up',
-				'flow', 'trust', 'play', 'believe', 'discipline', 'fear',
-				'endurance'
-            ]
-        };
+    /**
+     * Updates the top header date elements based on the current local date.
+     */
+    function updateDateHeader() {
+        const now = new Date();
+        const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
-        // Exclude keywords for meditation, pranayama, and single pose tutorials
-        const EXCLUDED_KEYWORDS = [
-            'meditation', 'pranayama', 'breathwork', 'breath work', 'guided meditation',
-            'pose breakdown', 'how to do', 'how to', 'pose',
-            'tree pose', 'crow pose', 'downward dog', 'warrior',
-            'headstand', 'handstand', 'wheel pose', 'chaturanga'
+        document.getElementById('date-day-name').textContent = days[now.getDay()];
+        document.getElementById('date-day-num').textContent = now.getDate();
+        document.getElementById('date-month-name').textContent = months[now.getMonth()];
+    }
+
+    /**
+     * TOP BUTTON LOGIC: Fetch Monthly Playlist & Video of the Day
+     */
+    async function fetchDailyYogaVideo() {
+        const now = new Date();
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
         ];
+        const currentMonthYear = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+        const dayOfMonth = now.getDate();
+        
+        const topBtn = document.getElementById('top-button');
 
-        // LocalStorage Streak Tracker Logic
-        const STREAK_STORAGE_KEY = 'yoga_kipod_streak_data';
+        try {
+            // Step 1: Search for the current month's playlist on the channel
+            const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&q=${encodeURIComponent(currentMonthYear)}&type=playlist&key=${API_KEY}`;
+            const searchRes = await fetch(searchUrl);
+            const searchData = await searchRes.json();
 
-        function getStreakData() {
-            try {
-                const data = localStorage.getItem(STREAK_STORAGE_KEY);
-                if (data) {
-                    return JSON.parse(data);
-                }
-            } catch (e) {
-                console.error('Error reading streak from localStorage:', e);
-            }
-            return { count: 0, lastDate: null };
-        }
-
-        function saveStreakData(data) {
-            try {
-                localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify(data));
-            } catch (e) {
-                console.error('Error saving streak to localStorage:', e);
-            }
-        }
-
-        function updateStreakDisplay() {
-            const streakData = getStreakData();
-            const countElem = document.getElementById('streak-count-text');
-            if (countElem) {
-                countElem.textContent = `${streakData.count} day streak`;
-            }
-        }
-
-        function recordPracticeLaunch() {
-            const todayStr = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-            const streakData = getStreakData();
-
-            if (streakData.lastDate === todayStr) {
-                // Already launched today, streak count unchanged
-                return;
+            if (!searchData.items || searchData.items.length === 0) {
+                throw new Error('Playlist not found');
             }
 
-            if (!streakData.lastDate) {
-                // First time ever launching
-                streakData.count = 1;
-                streakData.lastDate = todayStr;
-            } else {
-                // Check if lastDate was yesterday
-                const last = new Date(streakData.lastDate);
-                const today = new Date(todayStr);
-                const diffTime = today - last;
-                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+            const playlistId = searchData.items[0].id.playlistId;
 
-                if (diffDays === 1) {
-                    // Consecutive day! Increment streak
-                    streakData.count += 1;
-                    streakData.lastDate = todayStr;
-                } else if (diffDays > 1) {
-                    // Streak broken, reset to 1
-                    streakData.count = 1;
-                    streakData.lastDate = todayStr;
-                }
-                // if diffDays === 0, handled above by equality check
+            // Step 2: Fetch playlist items corresponding to the current day of the month
+            const playlistItemsUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&key=${API_KEY}`;
+            const playlistRes = await fetch(playlistItemsUrl);
+            const playlistData = await playlistRes.json();
+
+            const items = playlistData.items || [];
+            const videoItem = items[dayOfMonth - 1] || items[0];
+
+            if (!videoItem) {
+                throw new Error('Video not found');
             }
 
-            saveStreakData(streakData);
-            updateStreakDisplay();
-        }
+            const videoId = videoItem.snippet.resourceId.videoId;
+            const videoTitle = videoItem.snippet.title;
 
-        // Utility: Parse ISO 8601 Duration (e.g., PT36M12S -> "36 min", returns object with raw min and string)
-        function parseISO8601Duration(isoDuration) {
-            if (!isoDuration) return { minutes: 0, text: '-- min' };
-            const match = isoDuration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-            if (!match) return { minutes: 0, text: '-- min' };
-            
-            const hours = parseInt(match[1] || 0, 10);
-            const minutes = parseInt(match[2] || 0, 10);
-            const totalMinutes = (hours * 60) + minutes;
-            
-            return {
-                minutes: totalMinutes,
-                text: `${totalMinutes} min`
+            // Step 3: Fetch video duration details
+            const videoDetailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoId}&key=${API_KEY}`;
+            const videoRes = await fetch(videoDetailsUrl);
+            const videoData = await videoRes.json();
+
+            const rawDuration = videoData.items?.[0]?.contentDetails?.duration;
+            const formattedDuration = parseISO8601Duration(rawDuration).text;
+
+            // Update UI elements
+            document.getElementById('video-title').textContent = videoTitle;
+            document.getElementById('video-duration').textContent = formattedDuration;
+
+            // Bind click action to open the daily video
+            topBtn.onclick = () => openYouTubeVideo(videoId);
+
+        } catch (err) {
+            // Error handling fallback: Display FWFG calendar link
+            console.error('Error fetching YouTube daily video:', err);
+            document.getElementById('video-title').textContent = "YWA Calendar";
+            document.getElementById('video-duration').innerHTML = '<i class="fa-solid fa-calendar-day"></i>';
+            topBtn.onclick = () => {
+                window.location.href = 'https://fwfg.com/calendar';
             };
         }
+    }
 
-        // Utility: Launch YouTube app using Android Intent scheme (TV Bro / Android TV compatible)
-        function openYouTubeVideo(videoId) {
-            // Record practice for streak tracking upon launching any practice
-            recordPracticeLaunch();
+    /**
+     * FILTER & BOTTOM BUTTON LOGIC
+     */
 
-            const intentUrl = `intent://www.youtube.com/watch?v=${videoId}#Intent;package=com.google.android.youtube.tv;scheme=https;end;`;
-            const fallbackUrl = `https://www.youtube.com/watch?v=${videoId}`;
-            
+    /**
+     * Checks if a video's title or description contains any excluded keywords.
+     * @param {string} title - Video title.
+     * @param {string} description - Video description.
+     * @returns {boolean} True if video should be excluded.
+     */
+    function isExcludedVideo(title, description) {
+        const combinedText = `${title} ${description}`.toLowerCase();
+        return EXCLUDED_KEYWORDS.some(keyword => combinedText.includes(keyword));
+    }
+
+    /**
+     * Validates if a video matches the selected focus category keywords.
+     * @param {string} title - Video title.
+     * @param {string} description - Video description.
+     * @param {string[]} tags - Video tags.
+     * @param {string} focusCategory - Active focus category ('relax' | 'stretch' | 'energize').
+     * @returns {boolean} True if matching.
+     */
+    function matchesFocus(title, description, tags, focusCategory) {
+        if (!focusCategory) return true;
+        const keywords = FOCUS_KEYWORDS[focusCategory] || [];
+        const textToSearch = `${title} ${description} ${(tags || []).join(' ')}`.toLowerCase();
+        return keywords.some(kw => textToSearch.includes(kw));
+    }
+
+    /**
+     * Queries YouTube API for videos matching the active duration and focus filters.
+     * @param {Object|null} durationRange - { min: number, max: number } or null.
+     * @param {string|null} focusCategory - Focus category string or null.
+     * @returns {Promise<Object|null>} Selected video object or null if none found.
+     */
+    async function fetchFilteredVideo(durationRange, focusCategory) {
+        const cacheKey = `${durationRange ? durationRange.min + '-' + durationRange.max : 'all'}_${focusCategory || 'all'}`;
+        let validVideos;
+
+        // Check cache first to optimize performance and reduce API calls
+        if (videoCache.has(cacheKey)) {
+            validVideos = videoCache.get(cacheKey);
+        } else {
+            // Construct search query string
+            let queryTerms = ['Yoga with Adriene'];
+            if (focusCategory) queryTerms.push(focusCategory);
+            if (durationRange) queryTerms.push(`${durationRange.min} min`);
+
+            const query = queryTerms.join(' ');
+            const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&q=${encodeURIComponent(query)}&type=video&maxResults=25&key=${API_KEY}`;
+
             try {
-                window.location.href = intentUrl;
-            } catch (e) {
-                window.location.href = fallbackUrl;
-            }
-        }
-
-        // Update Date UI Elements
-        function updateDateHeader() {
-            const now = new Date();
-            const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-            const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-
-            document.getElementById('date-day-name').textContent = days[now.getDay()];
-            document.getElementById('date-day-num').textContent = now.getDate();
-            document.getElementById('date-month-name').textContent = months[now.getMonth()];
-        }
-
-        // Fetch YouTube Monthly Playlist & Video of the Day for top button
-        async function fetchDailyYogaVideo() {
-            const now = new Date();
-            const monthNames = [
-                'January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'
-            ];
-            const currentMonthYear = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
-            const dayOfMonth = now.getDate();
-			
-			// Always fetch and reference topBtn in function scope so it's accessible in catch
-			const topBtn = document.getElementById('top-button');
-
-            try {
-                // 1. Search for current month playlist in channel
-                const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&q=${encodeURIComponent(currentMonthYear)}&type=playlist&key=${API_KEY}`;
                 const searchRes = await fetch(searchUrl);
                 const searchData = await searchRes.json();
 
-                if (!searchData.items || searchData.items.length === 0) {
-                    throw new Error('Playlist not found');
-                }
+                if (!searchData.items || searchData.items.length === 0) return null;
 
-                const playlistId = searchData.items[0].id.playlistId;
+                const videoIds = searchData.items.map(item => item.id.videoId).filter(Boolean);
+                if (videoIds.length === 0) return null;
 
-                // 2. Fetch playlist items corresponding to the day of the month
-                const playlistItemsUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&key=${API_KEY}`;
-                const playlistRes = await fetch(playlistItemsUrl);
-                const playlistData = await playlistRes.json();
+                // Fetch detailed metadata (contentDetails for exact duration, snippet for tags)
+                const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${videoIds.join(',')}&key=${API_KEY}`;
+                const detailsRes = await fetch(detailsUrl);
+                const detailsData = await detailsRes.json();
 
-                // Get item corresponding to index (dayOfMonth - 1)
-                const items = playlistData.items || [];
-                const videoItem = items[dayOfMonth - 1] || items[0];
+                validVideos = [];
 
-                if (!videoItem) {
-                    throw new Error('Video not found');
-                }
+                for (const item of detailsData.items || []) {
+                    const title = item.snippet.title || '';
+                    const description = item.snippet.description || '';
+                    const tags = item.snippet.tags || [];
+                    const parsed = parseISO8601Duration(item.contentDetails?.duration);
 
-                const videoId = videoItem.snippet.resourceId.videoId;
-                const videoTitle = videoItem.snippet.title;
+                    // Apply exclusion filter
+                    if (isExcludedVideo(title, description)) continue;
 
-                // 3. Fetch video details for duration
-                const videoDetailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoId}&key=${API_KEY}`;
-                const videoRes = await fetch(videoDetailsUrl);
-                const videoData = await videoRes.json();
-
-                const rawDuration = videoData.items?.[0]?.contentDetails?.duration;
-                const formattedDuration = parseISO8601Duration(rawDuration).text;
-
-                // Update UI elements
-                document.getElementById('video-title').textContent = videoTitle;
-                document.getElementById('video-duration').textContent = formattedDuration;
-
-                // Configure click handler on top button
-                topBtn.onclick = () => openYouTubeVideo(videoId);
-
-            } catch (err) {
-                console.error('Error fetching YouTube video:', err);
-                document.getElementById('video-title').textContent = "YWA Calendar";
-                document.getElementById('video-duration').innerHTML = '<i class="fa-solid fa-calendar-day"></i>';
-				topBtn.onclick = function openCalendar() {
-                    recordPracticeLaunch();
-					window.location.href = 'https://fwfg.com/calendar';
-				};
-            }
-        }
-
-        // Check if video title or description contains exclusion keywords
-        function isExcludedVideo(title, description) {
-            const combinedText = `${title} ${description}`.toLowerCase();
-            return EXCLUDED_KEYWORDS.some(keyword => combinedText.includes(keyword));
-        }
-
-        // Check if video matches selected focus keywords
-        function matchesFocus(title, description, tags, focusCategory) {
-            if (!focusCategory) return true;
-            const keywords = FOCUS_KEYWORDS[focusCategory] || [];
-            const textToSearch = `${title} ${description} ${(tags || []).join(' ')}`.toLowerCase();
-            return keywords.some(kw => textToSearch.includes(kw));
-        }
-
-        // Search YouTube API for videos matching filters
-        async function fetchFilteredVideo(durationRange, focusCategory) {
-            const cacheKey = `${durationRange ? durationRange.min + '-' + durationRange.max : 'all'}_${focusCategory || 'all'}`;
-            
-            let validVideos;
-
-            // Use cached array of matching videos if available
-            if (videoCache.has(cacheKey)) {
-                validVideos = videoCache.get(cacheKey);
-            } else {
-                // Build query term based on selection
-                let queryTerms = ['Yoga with Adriene'];
-                if (focusCategory) {
-                    queryTerms.push(focusCategory);
-                }
-                if (durationRange) {
-                    queryTerms.push(`${durationRange.min} min`);
-                }
-
-                const query = queryTerms.join(' ');
-                const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&q=${encodeURIComponent(query)}&type=video&maxResults=25&key=${API_KEY}`;
-
-                try {
-                    const searchRes = await fetch(searchUrl);
-                    const searchData = await searchRes.json();
-
-                    if (!searchData.items || searchData.items.length === 0) {
-                        return null;
+                    // Apply duration range filter
+                    if (durationRange && (parsed.minutes < durationRange.min || parsed.minutes > durationRange.max)) {
+                        continue;
                     }
 
-                    const videoIds = searchData.items.map(item => item.id.videoId).filter(Boolean);
-                    if (videoIds.length === 0) return null;
-
-                    // Fetch details for all returned videos (contentDetails for duration, snippet for tags)
-                    const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${videoIds.join(',')}&key=${API_KEY}`;
-                    const detailsRes = await fetch(detailsUrl);
-                    const detailsData = await detailsRes.json();
-
-                    validVideos = [];
-
-                    for (const item of detailsData.items || []) {
-                        const title = item.snippet.title || '';
-                        const description = item.snippet.description || '';
-                        const tags = item.snippet.tags || [];
-                        const parsed = parseISO8601Duration(item.contentDetails?.duration);
-
-                        // Check exclusions
-                        if (isExcludedVideo(title, description)) {
-                            continue;
-                        }
-
-                        // Check duration range
-                        if (durationRange) {
-                            if (parsed.minutes < durationRange.min || parsed.minutes > durationRange.max) {
-                                continue;
-                            }
-                        }
-
-                        // Check focus keywords
-                        if (focusCategory && !matchesFocus(title, description, tags, focusCategory)) {
-                            continue;
-                        }
-
-                        validVideos.push({
-                            id: item.id,
-                            title: title,
-                            duration: parsed.text
-                        });
+                    // Apply focus keyword filter
+                    if (focusCategory && !matchesFocus(title, description, tags, focusCategory)) {
+                        continue;
                     }
 
-                    if (validVideos.length > 0) {
-                        videoCache.set(cacheKey, validVideos);
-                    } else {
-                        return null;
-                    }
+                    validVideos.push({
+                        id: item.id,
+                        title: title,
+                        duration: parsed.text
+                    });
+                }
 
-                } catch (err) {
-                    console.error('Error fetching filtered videos:', err);
+                if (validVideos.length > 0) {
+                    videoCache.set(cacheKey, validVideos);
+                } else {
                     return null;
                 }
-            }
 
-            // Return a random video from the list (preferring one different from the currently displayed video)
-            if (validVideos && validVideos.length > 0) {
-                const pool = validVideos.length > 1 
-                    ? validVideos.filter(v => v.id !== activeBottomVideoId) 
-                    : validVideos;
-                const selectedVideo = pool[Math.floor(Math.random() * pool.length)];
-                return selectedVideo;
-            }
-
-            return null;
-        }
-
-        // Update Bottom Button Display
-        async function updateBottomButton() {
-            const titleElem = document.getElementById('bottom-video-title');
-            const durationElem = document.getElementById('bottom-video-duration');
-
-            // If no filters selected, reset to DEFAULT_VIDEO
-            if (!currentSelectedDuration && !currentSelectedFocus) {
-                activeBottomVideoId = DEFAULT_VIDEO.id;
-                titleElem.textContent = DEFAULT_VIDEO.title;
-                durationElem.textContent = DEFAULT_VIDEO.duration;
-                return;
-            }
-
-            // Show loading state
-            titleElem.textContent = '...';
-            durationElem.textContent = '...';
-
-            const matchedVideo = await fetchFilteredVideo(currentSelectedDuration, currentSelectedFocus);
-
-            if (matchedVideo) {
-                activeBottomVideoId = matchedVideo.id;
-                titleElem.textContent = matchedVideo.title;
-                durationElem.textContent = matchedVideo.duration;
-            } else {
-                // Fallback to DEFAULT_VIDEO if no exact API match was found
-                activeBottomVideoId = DEFAULT_VIDEO.id;
-                titleElem.textContent = DEFAULT_VIDEO.title;
-                durationElem.textContent = DEFAULT_VIDEO.duration;
+            } catch (err) {
+                console.error('Error fetching filtered videos:', err);
+                return null;
             }
         }
 
-        // Setup Filter Buttons Click & Toggle behavior
-        function setupFilterButtons() {
-            const durationBtns = document.querySelectorAll('#duration-column button');
-            const focusBtns = document.querySelectorAll('#focus-column button');
-
-            // Duration Column Buttons Logic
-            durationBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const isAlreadySelected = btn.classList.contains('is-selected');
-
-                    // Deselect all duration buttons
-                    durationBtns.forEach(b => b.classList.remove('is-selected'));
-
-                    if (isAlreadySelected) {
-                        // Deselect current
-                        currentSelectedDuration = null;
-                    } else {
-                        // Select clicked button
-                        btn.classList.add('is-selected');
-                        const min = parseInt(btn.getAttribute('data-min'), 10);
-                        const max = parseInt(btn.getAttribute('data-max'), 10);
-                        currentSelectedDuration = { min, max };
-                    }
-
-                    updateBottomButton();
-                });
-            });
-
-            // Focus Column Buttons Logic
-            focusBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const isAlreadySelected = btn.classList.contains('is-selected');
-
-                    // Deselect all focus buttons
-                    focusBtns.forEach(b => b.classList.remove('is-selected'));
-
-                    if (isAlreadySelected) {
-                        // Deselect current
-                        currentSelectedFocus = null;
-                    } else {
-                        // Select clicked button
-                        btn.classList.add('is-selected');
-                        currentSelectedFocus = btn.getAttribute('data-value');
-                    }
-
-                    updateBottomButton();
-                });
-            });
-
-            // Bottom Button Click Handler
-            const bottomBtn = document.getElementById('bottom-button');
-            bottomBtn.addEventListener('click', () => {
-                openYouTubeVideo(activeBottomVideoId);
-            });
+        // Return a randomized video, prioritizing one different from the currently active video if possible
+        if (validVideos && validVideos.length > 0) {
+            const pool = validVideos.length > 1 
+                ? validVideos.filter(v => v.id !== activeBottomVideoId) 
+                : validVideos;
+            return pool[Math.floor(Math.random() * pool.length)];
         }
 
-        // Initialize setup and focus state
-        window.addEventListener('DOMContentLoaded', () => {
-            updateDateHeader();
-            fetchDailyYogaVideo();
-            setupFilterButtons();
-            updateStreakDisplay();
+        return null;
+    }
 
-            const topButton = document.getElementById('top-button');
-            if (topButton) {
-                topButton.focus();
-            }
-        });
+    /**
+     * Updates the bottom button UI and state based on current filter selections.
+     */
+    async function updateBottomButton() {
+        const titleElem = document.getElementById('bottom-video-title');
+        const durationElem = document.getElementById('bottom-video-duration');
 
-        // D-pad Enter press visuals & keyboard accessibility
-        document.addEventListener('keydown', (e) => {
-            const active = document.activeElement;
-            if (e.key === 'Enter' || e.key === ' ') {
-                if (active && active.classList.contains('tv-focusable')) {
-                    active.style.transform = 'scale(0.98)';
-                    setTimeout(() => {
-                        active.style.transform = '';
-                    }, 150);
+        // Fallback: If no filters are selected, revert immediately to DEFAULT_VIDEO
+        if (!currentSelectedDuration && !currentSelectedFocus) {
+            activeBottomVideoId = DEFAULT_VIDEO.id;
+            titleElem.textContent = DEFAULT_VIDEO.title;
+            durationElem.textContent = DEFAULT_VIDEO.duration;
+            return;
+        }
+
+        // Display loading indicator state
+        titleElem.textContent = '...';
+        durationElem.textContent = '...';
+
+        const matchedVideo = await fetchFilteredVideo(currentSelectedDuration, currentSelectedFocus);
+
+        if (matchedVideo) {
+            activeBottomVideoId = matchedVideo.id;
+            titleElem.textContent = matchedVideo.title;
+            durationElem.textContent = matchedVideo.duration;
+        } else {
+            // Fallback: Default video if no matching video was found or API failed
+            activeBottomVideoId = DEFAULT_VIDEO.id;
+            titleElem.textContent = DEFAULT_VIDEO.title;
+            durationElem.textContent = DEFAULT_VIDEO.duration;
+        }
+    }
+
+    /**
+     * Event Listeners Setup for Filter Columns and Bottom Button
+     */
+    function setupFilterButtons() {
+        const durationBtns = document.querySelectorAll('#duration-column button');
+        const focusBtns = document.querySelectorAll('#focus-column button');
+
+        // Duration Column Click & Toggle Behavior
+        durationBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const isAlreadySelected = btn.classList.contains('is-selected');
+
+                // Deselect all duration buttons in column
+                durationBtns.forEach(b => b.classList.remove('is-selected'));
+
+                if (isAlreadySelected) {
+                    currentSelectedDuration = null; // Deselect filter
+                } else {
+                    btn.classList.add('is-selected');
+                    currentSelectedDuration = {
+                        min: parseInt(btn.getAttribute('data-min'), 10),
+                        max: parseInt(btn.getAttribute('data-max'), 10)
+                    };
                 }
-            }
-        });
 
-        // Pointer/air-mouse support for MiBox / TV Bro browser
-        const focusableElements = document.querySelectorAll('.tv-focusable');
-        focusableElements.forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                el.focus();
+                updateBottomButton();
             });
         });
-    </script>
-</body>
-</html>
+
+        // Focus Column Click & Toggle Behavior
+        focusBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const isAlreadySelected = btn.classList.contains('is-selected');
+
+                // Deselect all focus buttons in column
+                focusBtns.forEach(b => b.classList.remove('is-selected'));
+
+                if (isAlreadySelected) {
+                    currentSelectedFocus = null; // Deselect filter
+                } else {
+                    btn.classList.add('is-selected');
+                    currentSelectedFocus = btn.getAttribute('data-value');
+                }
+
+                updateBottomButton();
+            });
+        });
+
+        // Bottom Button Click Handler (Launches active filtered video)
+        const bottomBtn = document.getElementById('bottom-button');
+        bottomBtn.addEventListener('click', () => {
+            openYouTubeVideo(activeBottomVideoId);
+        });
+    }
+
+    /**
+     * INITIALIZATION & ACCESSIBILITY HANDLERS
+     */
+    window.addEventListener('DOMContentLoaded', () => {
+        updateDateHeader();
+        fetchDailyYogaVideo();
+        setupFilterButtons();
+
+        // Set initial TV remote focus on top button
+        const topButton = document.getElementById('top-button');
+        if (topButton) {
+            topButton.focus();
+        }
+    });
+
+    // D-pad / Keyboard Enter press visual feedback for Android TV navigation
+    document.addEventListener('keydown', (e) => {
+        const active = document.activeElement;
+        if (e.key === 'Enter' || e.key === ' ') {
+            if (active && active.classList.contains('tv-focusable')) {
+                active.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    active.style.transform = '';
+                }, 150);
+            }
+        }
+    });
+
+    // Pointer / air-mouse hover support for TV browser environments (e.g., MiBox / TV Bro)
+    document.querySelectorAll('.tv-focusable').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            el.focus();
+        });
+    });
+</script>
