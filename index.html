@@ -116,10 +116,15 @@
         </button>
     </header>
 
-    <!-- SUBTLE GLOWING HORIZONTAL DIVIDER -->
-    <div class="w-full my-1 md:my-2 flex items-center justify-center">
-        <div class="w-full h-[0px]"></div>
+    <!-- STREAK TRACKER PILL (Between Top Button and Divider) -->
+    <div class="w-full flex justify-end px-1 my-0.5">
+        <div id="streak-pill" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs md:text-sm font-bold text-white shadow-md bg-teal-600">
+            <i class="fa-solid fa-fire text-orange-400"></i>
+            <span id="streak-count-text">0 day streak</span>
+        </div>
     </div>
+
+    <!-- SUBTLE GLOWING HORIZONTAL DIVIDER -->
     <div class="w-full my-1 md:my-2 flex items-center justify-center">
         <div class="w-full h-[1px] bg-gradient-to-r from-transparent via-purple-300/30 to-transparent"></div>
     </div>
@@ -255,6 +260,73 @@
             'headstand', 'handstand', 'wheel pose', 'chaturanga'
         ];
 
+        // LocalStorage Streak Tracker Logic
+        const STREAK_STORAGE_KEY = 'yoga_kipod_streak_data';
+
+        function getStreakData() {
+            try {
+                const data = localStorage.getItem(STREAK_STORAGE_KEY);
+                if (data) {
+                    return JSON.parse(data);
+                }
+            } catch (e) {
+                console.error('Error reading streak from localStorage:', e);
+            }
+            return { count: 0, lastDate: null };
+        }
+
+        function saveStreakData(data) {
+            try {
+                localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify(data));
+            } catch (e) {
+                console.error('Error saving streak to localStorage:', e);
+            }
+        }
+
+        function updateStreakDisplay() {
+            const streakData = getStreakData();
+            const countElem = document.getElementById('streak-count-text');
+            if (countElem) {
+                countElem.textContent = `${streakData.count} day streak`;
+            }
+        }
+
+        function recordPracticeLaunch() {
+            const todayStr = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+            const streakData = getStreakData();
+
+            if (streakData.lastDate === todayStr) {
+                // Already launched today, streak count unchanged
+                return;
+            }
+
+            if (!streakData.lastDate) {
+                // First time ever launching
+                streakData.count = 1;
+                streakData.lastDate = todayStr;
+            } else {
+                // Check if lastDate was yesterday
+                const last = new Date(streakData.lastDate);
+                const today = new Date(todayStr);
+                const diffTime = today - last;
+                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 1) {
+                    // Consecutive day! Increment streak
+                    streakData.count += 1;
+                    streakData.lastDate = todayStr;
+                } else if (diffDays > 1) {
+                    // Streak broken, reset to 1
+                    streakData.count = 1;
+                    streakData.lastDate = todayStr;
+                }
+                // if diffDays === 0, handled above by equality check
+            }
+
+            saveStreakData(streakData);
+            updateStreakDisplay();
+        }
+
         // Utility: Parse ISO 8601 Duration (e.g., PT36M12S -> "36 min", returns object with raw min and string)
         function parseISO8601Duration(isoDuration) {
             if (!isoDuration) return { minutes: 0, text: '-- min' };
@@ -273,6 +345,9 @@
 
         // Utility: Launch YouTube app using Android Intent scheme (TV Bro / Android TV compatible)
         function openYouTubeVideo(videoId) {
+            // Record practice for streak tracking upon launching any practice
+            recordPracticeLaunch();
+
             const intentUrl = `intent://www.youtube.com/watch?v=${videoId}#Intent;package=com.google.android.youtube.tv;scheme=https;end;`;
             const fallbackUrl = `https://www.youtube.com/watch?v=${videoId}`;
             
@@ -355,6 +430,7 @@
                 document.getElementById('video-title').textContent = "YWA Calendar";
                 document.getElementById('video-duration').innerHTML = '<i class="fa-solid fa-calendar-day"></i>';
 				topBtn.onclick = function openCalendar() {
+                    recordPracticeLaunch();
 					window.location.href = 'https://fwfg.com/calendar';
 				};
             }
@@ -560,6 +636,7 @@
             updateDateHeader();
             fetchDailyYogaVideo();
             setupFilterButtons();
+            updateStreakDisplay();
 
             const topButton = document.getElementById('top-button');
             if (topButton) {
