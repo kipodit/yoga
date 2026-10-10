@@ -351,8 +351,10 @@
             } catch (err) {
                 console.error('Error fetching YouTube video:', err);
                 document.getElementById('video-title').textContent = "Calendar";
-                document.getElementById('video-duration').textContent = "";
-				topBtn.onclick = window.open('https://fwfg.com/calendar');
+                document.getElementById('video-duration').textContent = "📅";
+				topBtn.onclick = function() {
+					window.location.href = 'https://fwfg.com/calendar';
+				};
             }
         }
 
