@@ -352,7 +352,7 @@
                 console.error('Error fetching YouTube video:', err);
                 document.getElementById('video-title').textContent = "Calendar";
                 document.getElementById('video-duration').textContent = "📅";
-				topBtn.onclick = function() {
+				topBtn.onclick = function openCalendar() {
 					window.location.href = 'https://fwfg.com/calendar';
 				};
             }
@@ -490,9 +490,10 @@
                 titleElem.textContent = matchedVideo.title;
                 durationElem.textContent = matchedVideo.duration;
             } else {
-                // Graceful fallback if no exact API match was found
-                titleElem.textContent = `Yoga with Adriene Practice ${currentSelectedFocus ? '(' + currentSelectedFocus + ')' : ''}`;
-                durationElem.textContent = currentSelectedDuration ? `${currentSelectedDuration.min}-${currentSelectedDuration.max} min` : 'Practice';
+                // Fallback to DEFAULT_VIDEO if no exact API match was found
+                activeBottomVideoId = DEFAULT_VIDEO.id;
+                titleElem.textContent = DEFAULT_VIDEO.title;
+                durationElem.textContent = DEFAULT_VIDEO.duration;
             }
         }
 
