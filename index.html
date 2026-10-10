@@ -163,7 +163,7 @@
                     <span>stretch</span>
                     <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
                 </button>
-                <button tabindex="0" data-type="focus" data-value="power" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
+                <button tabindex="0" data-type="focus" data-value="energize" class="tv-focusable w-full rounded-xl py-2.5 px-4 text-left text-sm md:text-base font-bold flex justify-between items-center">
                     <span>energize</span>
                     <i class="fa-solid fa-circle-check check-indicator opacity-0 transition-all text-teal-300"></i>
                 </button>
@@ -213,7 +213,7 @@
 
         // App state
         let currentSelectedDuration = null; // { min: number, max: number } | null
-        let currentSelectedFocus = null;    // string ('relax' | 'stretch' | 'power') | null
+        let currentSelectedFocus = null;    // string ('relax' | 'stretch' | 'energize') | null
         let activeBottomVideoId = DEFAULT_VIDEO.id;
         let videoCache = new Map();         // In-memory cache for API query responses
 
@@ -222,25 +222,36 @@
             relax: [
                 'relax', 'sleep', 'stress', 'slow', 'gentle', 'night', 'bed', 
                 'soft', 'calm', 'unwind', 'restorative', 'cozy', 'soothe', 
-                'evening', 'peace', 'soothing', 'comfort', 'ease'
+                'evening', 'peace', 'soothing', 'comfort', 'ease', 'blanket',
+				'bedtime', 'nervous', 'heart', 'cortisol', 'center', 'mental',
+				'sad', 'grief', 'overthinking', 'healing', 'tired', 'recovery',
+				'unmotivated', 'feel good', 'ease', 'pain', 'gut', 'wind down',
+				'ptsd', 'stuck', 'center', 'disaster', 'depression', 'loneliness',
+				'anxiety', 'let it go', 'focus', 'gratitude', 'angry', 'bad mood'
             ],
             stretch: [
                 'stretch', 'deep', 'release', 'hamstrings', 'neck', 'back', 
-                'hips', 'shoulders', 'spine', 'runner', 'dancer', 'tennis', 
-                'legs', 'flexibility', 'full body stretch', 'opening', 'joints'
+                'hips', 'shoulders', 'spine', 'runners', 'dancers', 'tennis', 
+                'legs', 'flexibility', 'full body stretch', 'opening', 'joints',
+				'posture', 'tight', 'sit', 'mobility', 'calves', 'open', 'gardeners',
+				'scoliosis', 'knees', 'balance', 'manual labor', 'psoas', 'cyclists',
+				'sciatica', 'sore'
             ],
-            power: [
+            energize: [
                 'power', 'energy', 'awake', 'total', 'workout', 'core', 
                 'strength', 'fiery', 'burn', 'dynamic', 'vinyasa', 'sweat', 
-                'abs', 'toned', 'strong', 'fire', 'empower'
+                'abs', 'toned', 'strong', 'fire', 'empower', 'energize',
+				'morning', 'full', 'weight loss', 'strengthen', 'wake up',
+				'flow', 'trust', 'play', 'believe', 'discipline', 'fear',
+				'endurance'
             ]
         };
 
         // Exclude keywords for meditation, pranayama, and single pose tutorials
         const EXCLUDED_KEYWORDS = [
             'meditation', 'pranayama', 'breathwork', 'breath work', 'guided meditation',
-            'pose breakdown', 'how to do', 'how to', 'pose of the week',
-            'tree pose', 'crow pose', 'downward dog', 'warrior 1', 'warrior 2',
+            'pose breakdown', 'how to do', 'how to', 'pose',
+            'tree pose', 'crow pose', 'downward dog', 'warrior',
             'headstand', 'handstand', 'wheel pose', 'chaturanga'
         ];
 
@@ -315,7 +326,7 @@
                 const videoItem = items[dayOfMonth - 1] || items[0];
 
                 if (!videoItem) {
-                    throw new Error('Video item not found');
+                    throw new Error('Video not found');
                 }
 
                 const videoId = videoItem.snippet.resourceId.videoId;
@@ -338,9 +349,10 @@
                 topBtn.onclick = () => openYouTubeVideo(videoId);
 
             } catch (err) {
-                console.error('Error fetching YouTube daily video:', err);
-                document.getElementById('video-title').textContent = "?";
-                document.getElementById('video-duration').textContent = "-- min";
+                console.error('Error fetching YouTube video:', err);
+                document.getElementById('video-title').textContent = "Calendar";
+                document.getElementById('video-duration').textContent = "";
+				topBtn.onclick = window.open('https://fwfg.com/calendar');
             }
         }
 
